@@ -11,7 +11,15 @@ export const env = createEnv({
     DISCORD_GUILD_ID: z.string().optional(),
     MGE_API_URL: z.string().url('MGE_API_URL must be a valid URL'),
     MGE_API_KEY: z.string().min(1, 'MGE_API_KEY is required'),
-    VERIFIED_ROLE_ID: z.string().min(1, 'VERIFIED_ROLE_ID is required'),
+    VERIFY_ADD_ROLE_IDS: z
+      .string()
+      .min(1, 'VERIFY_ADD_ROLE_IDS is required')
+      .transform((val) => val.split(',').map((id) => id.trim()).filter(Boolean)),
+    VERIFY_REMOVE_ROLE_IDS: z
+      .string()
+      .optional()
+      .default('')
+      .transform((val) => val.split(',').map((id) => id.trim()).filter(Boolean)),
     VERIFICATION_CHANNEL_ID: z.string().optional(),
     LOG_LEVEL: z
       .enum(['debug', 'info', 'warn', 'error'])

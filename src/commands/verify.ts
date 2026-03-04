@@ -78,6 +78,42 @@ export const command: Command<ChatInputCommandInteraction> = {
 
     // No linked account found
     if (!linkedAccount) {
+      // If a profile URL was provided, look up that account to give a better message
+      if (providedSteamId) {
+        try {
+          const profileUser =
+            await mgeApi.getUserBySteamId(providedSteamId);
+
+          if (!profileUser) {
+            await interaction.editReply(
+              `No mge.tf account found for Steam ID \`${providedSteamId}\`. Make sure the profile URL is correct.`
+            );
+            return;
+          }
+
+          if (profileUser.discordId && profileUser.discordId !== interaction.user.id) {
+            await interaction.editReply(
+              `The mge.tf account **${profileUser.steamUsername}** (\`${providedSteamId}\`) is linked to a different Discord account (**${profileUser.discordUsername ?? 'unknown'}**).\n\n` +
+                'If this is your mge.tf account, please contact an admin to have the old Discord account unlinked.'
+            );
+            return;
+          }
+
+          if (!profileUser.discordId) {
+            await interaction.editReply(
+              `The mge.tf account **${profileUser.steamUsername}** (\`${providedSteamId}\`) exists but has no Discord account linked.\n\n` +
+                'To link your account:\n' +
+                '1. Log in at <https://mge.tf>\n' +
+                '2. Go to your profile and click **Link Discord Account**\n' +
+                '3. Run `/verify` again once linked'
+            );
+            return;
+          }
+        } catch (err) {
+          log.error({ err }, 'Failed to look up mge.tf user by Steam ID');
+        }
+      }
+
       await interaction.editReply(
         'Your Discord account is not linked to any mge.tf account.\n\n' +
           'To link your account:\n' +
@@ -97,16 +133,20 @@ export const command: Command<ChatInputCommandInteraction> = {
       return;
     }
 
-    // Assign the verified role
+    // Update roles on verification
     try {
-      await interaction.member.roles.add(env.VERIFIED_ROLE_ID);
+      const { roles } = interaction.member;
+      await Promise.all([
+        ...env.VERIFY_ADD_ROLE_IDS.map((id) => roles.add(id)),
+        ...env.VERIFY_REMOVE_ROLE_IDS.map((id) => roles.remove(id))
+      ]);
     } catch (err) {
       log.error(
         { err, userId: interaction.user.id },
-        'Failed to assign verified role'
+        'Failed to update roles during verification'
       );
       await interaction.editReply(
-        'Your account is linked, but I could not assign the Verified role. Please contact an admin.'
+        'Your account is linked, but I could not update your roles. Please contact an admin.'
       );
       return;
     }

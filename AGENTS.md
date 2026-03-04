@@ -59,11 +59,12 @@ src/
 DISCORD_BOT_TOKEN: string
 DISCORD_APPLICATION_ID: string
 MGE_API_URL: string      // e.g. https://mge.tf
-MGE_API_KEY: string      // Generated in Admin → Site → API Keys
-VERIFIED_ROLE_ID: string // Discord role ID to assign on verification
+MGE_API_KEY: string              // Generated in Admin → Site → API Keys
+VERIFY_ADD_ROLE_IDS: string      // Comma-separated role IDs to add on verification
 
 // Optional
-DISCORD_GUILD_ID?: string           // Guild-scoped command deployment
+VERIFY_REMOVE_ROLE_IDS?: string  // Comma-separated role IDs to remove on verification
+DISCORD_GUILD_ID?: string        // Guild-scoped command deployment
 VERIFICATION_CHANNEL_ID?: string    // Restrict /verify to one channel
 LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 ```

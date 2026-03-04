@@ -28,4 +28,9 @@ for (const event of events) {
 
 log.info(`Loaded ${events.length} event(s).`);
 
-client.login(env.DISCORD_BOT_TOKEN);
+try {
+  await client.login(env.DISCORD_BOT_TOKEN);
+} catch (err) {
+  log.fatal({ err }, 'Failed to log in to Discord');
+  process.exit(1);
+}

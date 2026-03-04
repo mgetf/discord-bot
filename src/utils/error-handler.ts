@@ -6,8 +6,12 @@ const log = logger.child({ name: 'error-handler' });
  * Setup global error handlers
  */
 export const setupErrorHandlers = () => {
-  process.on('unhandledRejection', (reason, promise) => {
-    log.error({ reason, promise }, 'Unhandled Rejection');
+  process.on('unhandledRejection', (reason) => {
+    if (reason instanceof Error) {
+      log.error({ err: reason }, 'Unhandled Rejection');
+    } else {
+      log.error({ reason: String(reason) }, 'Unhandled Rejection');
+    }
   });
 
   process.on('uncaughtException', (error) => {

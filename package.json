@@ -1,7 +1,7 @@
 {
-  "name": "discord-bot-template",
+  "name": "mgetf-discord-bot",
   "version": "1.0.0",
-  "description": "Type-safe Discord bot template with Bun and Biome",
+  "description": "Discord verification bot for mge.tf",
   "author": "",
   "license": "MIT",
   "type": "module",

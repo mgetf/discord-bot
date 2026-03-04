@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    env:
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN || 'DUMMY' }}
+      DISCORD_APPLICATION_ID: ${{ secrets.DISCORD_APPLICATION_ID || 'DUMMY' }}
+      DISCORD_GUILD_ID: ${{ secrets.DISCORD_GUILD_ID || 'DUMMY' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Biome check
+        run: bun run check
+
+      - name: TypeScript typecheck
+        run: bun run typecheck
+
+      # Deploy commands globally (optional, need APPLICATION_ID)
+      # - name: Deploy commands
+      #   run: bun run deploy-commands --global
+

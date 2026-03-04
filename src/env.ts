@@ -1,11 +1,13 @@
-import { createEnv } from '@t3-oss/env-core'
-import { z } from 'zod'
+import { createEnv } from '@t3-oss/env-core';
+import { z } from 'zod';
 
 export const env = createEnv({
   runtimeEnv: process.env,
   server: {
     DISCORD_BOT_TOKEN: z.string().min(1, 'DISCORD_BOT_TOKEN is required'),
-    DISCORD_APPLICATION_ID: z.string().min(1, 'DISCORD_APPLICATION_ID is required'),
+    DISCORD_APPLICATION_ID: z
+      .string()
+      .min(1, 'DISCORD_APPLICATION_ID is required'),
     DISCORD_GUILD_ID: z.string().optional(),
     MGE_API_URL: z.string().url('MGE_API_URL must be a valid URL'),
     MGE_API_KEY: z.string().min(1, 'MGE_API_KEY is required'),
@@ -16,4 +18,4 @@ export const env = createEnv({
       .optional()
       .default('info')
   }
-})
+});

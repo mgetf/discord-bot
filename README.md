@@ -1,16 +1,14 @@
-# mge.tf Discord Verification Bot
+# mge.tf Discord Bot
 
 [![Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1?logo=bun)](https://bun.sh/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?logo=discord&logoColor=white)](https://discord.js.org/)
 
-Automates Discord account verification for the mge.tf community. Users run `/verify` and the bot checks whether their Discord account is linked to an mge.tf profile, then assigns the Verified role automatically — no admin review needed.
+The official Discord bot for the [mge.tf](https://mge.tf) community.
 
-## How it Works
+## Features
 
-1. A user links their Discord account on mge.tf (Profile → Link Discord Account).
-2. They run `/verify` (optionally providing their mge.tf profile URL for cross-check).
-3. The bot calls the mge.tf API to confirm the link, then assigns the Verified role.
+- **Account Verification** — Users link their Discord on mge.tf, then run `/verify` to automatically receive server roles. Supports cross-checking profile URLs and provides detailed feedback when links don't match.
 
 ## Setup
 
@@ -40,8 +38,11 @@ DISCORD_GUILD_ID=your_guild_id_here
 MGE_API_URL=https://mge.tf
 MGE_API_KEY=mge_your_api_key_here
 
-# Discord role ID to assign to verified users
-VERIFIED_ROLE_ID=your_verified_role_id_here
+# Comma-separated role IDs to add on successful verification
+VERIFY_ADD_ROLE_IDS=role_id_1,role_id_2
+
+# Optional: comma-separated role IDs to remove on successful verification
+VERIFY_REMOVE_ROLE_IDS=
 
 # Optional: restrict /verify to a specific channel
 VERIFICATION_CHANNEL_ID=
@@ -58,7 +59,7 @@ VERIFICATION_CHANNEL_ID=
 
 1. Log in to mge.tf as a head admin
 2. Go to **Admin → Site → API Keys**
-3. Create a new key (e.g. "Discord Verification Bot")
+3. Create a new key (e.g. "Discord Bot")
 4. Copy the key to `MGE_API_KEY`
 
 ### 5. Deploy commands
@@ -81,7 +82,7 @@ bun run start
 
 | Command | Description |
 |---------|-------------|
-| `/verify` | Verify your mge.tf account and receive the Verified role |
+| `/verify` | Verify your mge.tf account and receive server roles |
 | `/verify profile:<url>` | Same as above, but cross-checks the provided mge.tf profile URL |
 
 ## Project Structure

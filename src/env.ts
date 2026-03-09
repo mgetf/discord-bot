@@ -21,6 +21,7 @@ export const env = createEnv({
       .default('')
       .transform((val) => val.split(',').map((id) => id.trim()).filter(Boolean)),
     VERIFICATION_CHANNEL_ID: z.string().optional(),
+    VERIFICATION_LOG_CHANNEL_ID: z.string().optional(),
     LOG_LEVEL: z
       .enum(['debug', 'info', 'warn', 'error'])
       .optional()

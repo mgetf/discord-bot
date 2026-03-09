@@ -65,7 +65,8 @@ VERIFY_ADD_ROLE_IDS: string      // Comma-separated role IDs to add on verificat
 // Optional
 VERIFY_REMOVE_ROLE_IDS?: string  // Comma-separated role IDs to remove on verification
 DISCORD_GUILD_ID?: string        // Guild-scoped command deployment
-VERIFICATION_CHANNEL_ID?: string    // Restrict /verify to one channel
+VERIFICATION_CHANNEL_ID?: string       // Restrict /verify to one channel
+VERIFICATION_LOG_CHANNEL_ID?: string   // Channel for verification audit logs
 LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 ```
 

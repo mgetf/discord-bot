@@ -17,6 +17,7 @@
   "dependencies": {
     "@t3-oss/env-core": "^0.13.10",
     "discord.js": "^14.25.1",
+    "mysql2": "^3.22.5",
     "pino": "^10.1.0",
     "zod": "^4.3.5"
   },

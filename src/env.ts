@@ -14,14 +14,30 @@ export const env = createEnv({
     VERIFY_ADD_ROLE_IDS: z
       .string()
       .min(1, 'VERIFY_ADD_ROLE_IDS is required')
-      .transform((val) => val.split(',').map((id) => id.trim()).filter(Boolean)),
+      .transform((val) =>
+        val
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean)
+      ),
     VERIFY_REMOVE_ROLE_IDS: z
       .string()
       .optional()
       .default('')
-      .transform((val) => val.split(',').map((id) => id.trim()).filter(Boolean)),
+      .transform((val) =>
+        val
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean)
+      ),
     VERIFICATION_CHANNEL_ID: z.string().optional(),
     VERIFICATION_LOG_CHANNEL_ID: z.string().optional(),
+    // Whois alt-check databases — format: host:port:password
+    WHOIS_DB_NA: z.string().optional(),
+    WHOIS_DB_EU: z.string().optional(),
+    WHOIS_DB_ASIA: z.string().optional(),
+    // Optional: restrict /altcheck to a specific channel
+    ALTCHECK_CHANNEL_ID: z.string().optional(),
     LOG_LEVEL: z
       .enum(['debug', 'info', 'warn', 'error'])
       .optional()

@@ -6,8 +6,8 @@ import {
   SlashCommandBuilder,
   TextChannel
 } from 'discord.js';
-import type { Command } from '@/types';
 import { env } from '@/env';
+import type { Command } from '@/types';
 import { mgeApi } from '@/utils/api';
 import { logger } from '@/utils/logger';
 
@@ -117,8 +117,7 @@ export const command: Command<ChatInputCommandInteraction> = {
       // If a profile URL was provided, look up that account to give a better message
       if (providedSteamId) {
         try {
-          const profileUser =
-            await mgeApi.getUserBySteamId(providedSteamId);
+          const profileUser = await mgeApi.getUserBySteamId(providedSteamId);
 
           if (!profileUser) {
             await sendVerificationLog(interaction, {
@@ -131,7 +130,10 @@ export const command: Command<ChatInputCommandInteraction> = {
             return;
           }
 
-          if (profileUser.discordId && profileUser.discordId !== interaction.user.id) {
+          if (
+            profileUser.discordId &&
+            profileUser.discordId !== interaction.user.id
+          ) {
             await sendVerificationLog(interaction, {
               success: false,
               description: `Provided profile **${profileUser.steamUsername}** (\`${providedSteamId}\`) — linked to a different Discord account (**${profileUser.discordUsername ?? 'unknown'}**).`

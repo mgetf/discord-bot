@@ -9,6 +9,7 @@ The official Discord bot for the [mge.tf](https://mge.tf) community.
 ## Features
 
 - **Account Verification** — Users link their Discord on mge.tf, then run `/verify` to automatically receive server roles. Supports cross-checking profile URLs and provides detailed feedback when links don't match.
+- **Alt Account Detection** — `/altcheck` cross-references shared-IP whois databases across regions to flag likely alt accounts of a given Steam ID, for use by server admins/moderators.
 
 ## Setup
 
@@ -46,6 +47,18 @@ VERIFY_REMOVE_ROLE_IDS=
 
 # Optional: restrict /verify to a specific channel
 VERIFICATION_CHANNEL_ID=
+
+# Optional: channel to post verification logs (successes and failures)
+VERIFICATION_LOG_CHANNEL_ID=
+
+# Whois alt-check — MySQL connection strings, format: host:port:password
+# Leave blank to skip that region. At least one must be set to use /altcheck.
+WHOIS_DB_NA=
+WHOIS_DB_EU=
+WHOIS_DB_ASIA=
+
+# Optional: restrict /altcheck to a specific channel
+ALTCHECK_CHANNEL_ID=
 ```
 
 ### 3. Create a Discord Application
@@ -84,6 +97,9 @@ bun run start
 |---------|-------------|
 | `/verify` | Verify your mge.tf account and receive server roles |
 | `/verify profile:<url>` | Same as above, but cross-checks the provided mge.tf profile URL |
+| `/altcheck steam_id:<id>` | Cross-reference whois databases for potential alt accounts of a Steam ID |
+
+`/altcheck` requires at least one of `WHOIS_DB_NA`, `WHOIS_DB_EU`, or `WHOIS_DB_ASIA` to be configured, and can optionally be restricted to a single channel via `ALTCHECK_CHANNEL_ID`. It has no additional role gating — anyone who can use slash commands in the allowed channel can run it.
 
 ## Project Structure
 
@@ -95,12 +111,14 @@ src/
 ├── types.d.ts        # Type definitions
 ├── deploy.ts         # Slash command deployment script
 ├── commands/
-│   └── verify.ts     # /verify command
+│   ├── verify.ts     # /verify command
+│   └── altcheck.ts   # /altcheck command
 ├── events/
 │   ├── ready.ts      # Bot ready handler
 │   └── interaction-create.ts  # Command router
 └── utils/
     ├── api.ts        # mge.tf API client
+    ├── whois.ts      # Alt-check scoring against whois databases
     ├── core.ts       # Dynamic command/event loader
     ├── logger.ts     # Pino logger
     └── error-handler.ts  # Global error handlers

@@ -236,7 +236,7 @@ export const command: Command<ChatInputCommandInteraction> = {
     if (sdrRegions.length > 0) {
       embed.addFields({
         name: '⚠️ SDR relay detected',
-        value: `Recent connections in **${sdrRegions.join(', ')}** route through Valve SDR — real IP is hidden. Alt detection is less effective for recent activity.`
+        value: `Recent connections in **${sdrRegions.join(', ')}** route through Valve SDR — the real IP is hidden. Matches from relay addresses are weighted lower and less certain than matches on a real IP.`
       });
     }
 

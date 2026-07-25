@@ -55,7 +55,7 @@ export function normaliseSteamId(
 // IP classification
 // ---------------------------------------------------------------------------
 
-export type IpType = 'home' | 'cloud-vpn' | 'private' | 'link-local';
+export type IpType = 'home' | 'cloud-vpn' | 'sdr-relay' | 'private';
 
 export interface IpInfo {
   type: IpType;
@@ -64,8 +64,14 @@ export interface IpInfo {
 }
 
 function classifyIp(ip: string): IpInfo {
+  // Valve's Steam Datagram Relay (SDR, "-enablefakeip") masks the client's
+  // real IP behind a relay address in this link-local range. It's not the
+  // player's real IP, but relay endpoints are assigned per network
+  // path/POP, so the same relay address does tend to recur for the same
+  // real-world network. Treated as a weak signal (see SDR_PENALTY) rather
+  // than excluded outright.
   if (ip.startsWith('169.254.'))
-    return { type: 'link-local', label: 'SDR relay', skip: true };
+    return { type: 'sdr-relay', label: 'SDR relay', skip: false };
   if (
     ip.startsWith('10.') ||
     ip.startsWith('172.16.') ||
@@ -151,6 +157,7 @@ export interface RegionResult {
 // ---------------------------------------------------------------------------
 
 const CLOUD_PENALTY = 0.3;
+const SDR_PENALTY = 0.5;
 const TEMPORAL_WINDOW_H = 72;
 
 function verdict(score: number): AltVerdict {
@@ -212,10 +219,8 @@ async function analyseRegion(
       c: number;
     })[]) {
       const info = classifyIp(r.ip);
-      if (info.type === 'link-local') {
-        result.sdr = true;
-        continue;
-      }
+      if (info.type === 'sdr-relay') result.sdr = true;
+      if (info.skip) continue;
       result.ips.push({
         ip: r.ip,
         connections: r.c,
@@ -282,6 +287,7 @@ async function analyseRegion(
         const info = classifyIp(ip);
         let w = 1 / Math.log2(accounts + 1);
         if (info.type === 'cloud-vpn') w *= CLOUD_PENALTY;
+        if (info.type === 'sdr-relay') w *= SDR_PENALTY;
         baseScore += w;
         return { ip, accounts, label: info.label, type: info.type as IpType };
       });

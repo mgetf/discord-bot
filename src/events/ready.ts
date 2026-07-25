@@ -11,7 +11,11 @@ export const event: Event<Events.ClientReady> = {
     log.info(`Bot ready! Logged in as ${client.user?.tag}`);
     const inviteLink = client.generateInvite({
       scopes: [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands],
-      permissions: [PermissionFlagsBits.Administrator]
+      permissions: [
+        PermissionFlagsBits.ManageRoles,
+        PermissionFlagsBits.SendMessages,
+        PermissionFlagsBits.EmbedLinks
+      ]
     });
     process.env.NODE_ENV !== 'production' &&
       log.info({ inviteLink }, 'Invite Link (Dev Only):');

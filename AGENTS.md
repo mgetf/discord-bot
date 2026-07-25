@@ -1,7 +1,9 @@
 ## Overview
 
-The **mge.tf Discord Verification Bot** automates account verification for the mge.tf community.
-When a user runs `/verify`, the bot calls the mge.tf external API to check whether their Discord ID is linked to an mge.tf account, then assigns the Verified role on success.
+The **mge.tf Discord Bot** serves the mge.tf community with two features:
+
+- **Verification** — when a user runs `/verify`, the bot calls the mge.tf external API to check whether their Discord ID is linked to an mge.tf account, then assigns configured roles on success.
+- **Alt detection** — `/altcheck` cross-references shared-IP whois databases (per region) to flag likely alt accounts of a given Steam ID.
 
 ## Tech Stack
 
@@ -26,12 +28,14 @@ src/
 ├── types.d.ts        # Type definitions
 ├── deploy.ts         # Command deployment script
 ├── commands/
-│   └── verify.ts     # /verify slash command
+│   ├── verify.ts     # /verify slash command
+│   └── altcheck.ts   # /altcheck slash command
 ├── events/
 │   ├── ready.ts      # Bot ready handler
 │   └── interaction-create.ts  # Command router
 └── utils/
     ├── api.ts        # mge.tf external API client
+    ├── whois.ts      # Alt-check scoring against whois databases
     ├── core.ts       # Dynamic command/event loader
     ├── logger.ts     # Pino logger configuration
     └── error-handler.ts  # Global error handlers
@@ -67,6 +71,10 @@ VERIFY_REMOVE_ROLE_IDS?: string  // Comma-separated role IDs to remove on verifi
 DISCORD_GUILD_ID?: string        // Guild-scoped command deployment
 VERIFICATION_CHANNEL_ID?: string       // Restrict /verify to one channel
 VERIFICATION_LOG_CHANNEL_ID?: string   // Channel for verification audit logs
+WHOIS_DB_NA?: string              // host:port:password — NA whois DB for /altcheck
+WHOIS_DB_EU?: string              // host:port:password — EU whois DB for /altcheck
+WHOIS_DB_ASIA?: string            // host:port:password — Asia whois DB for /altcheck
+ALTCHECK_CHANNEL_ID?: string      // Restrict /altcheck to one channel
 LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 ```
 
@@ -81,6 +89,14 @@ LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 3. If a `profile` URL argument was provided, cross-checks the Steam ID
 4. Assigns `VERIFIED_ROLE_ID` via `interaction.member.roles.add()`
 5. All replies are ephemeral
+
+### `src/commands/altcheck.ts`
+**`/altcheck` command**. Full flow:
+1. Optionally restricts to `ALTCHECK_CHANNEL_ID`
+2. Normalizes the provided Steam ID (accepts `STEAM_0:Y:W`, `[U:1:N]`, or Steam64)
+3. Builds the list of configured regions from `WHOIS_DB_NA/EU/ASIA` and runs `runAltCheck()` from `src/utils/whois.ts` against each
+4. Renders a summary embed with per-region entry counts, IP overlap, and scored alt candidates (weighted by IP exclusivity, temporal proximity, and co-presence)
+5. No permission gating beyond the optional channel restriction — anyone able to use slash commands in that channel can run it
 
 ---
 
@@ -133,7 +149,7 @@ export const event: Event<Events.EventName> = {
 ```
 
 ### Existing Events
-- `ready.ts`: Bot ready. Generates invite link (dev only)
+- `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `SendMessages`, `EmbedLinks`), logged in dev only
 - `interaction-create.ts`: Handles slash command interactions
 
 ---
@@ -142,6 +158,9 @@ export const event: Event<Events.EventName> = {
 
 ### `api.ts`
 **mge.tf API client**. Configure base URL and key via env. Throws on network errors, returns null on 404.
+
+### `whois.ts`
+**Alt-check scoring**. Connects to per-region MySQL whois databases (credentials from `WHOIS_DB_NA/EU/ASIA`, format `host:port:password`), looks up connection history for a Steam ID, and scores other accounts sharing IPs as potential alts (IP exclusivity + coverage, temporal proximity, co-presence bonuses). Detects Valve SDR relay addresses and weights those matches lower.
 
 ### `core.ts`
 **Dynamic module loader**.

@@ -10,6 +10,7 @@ multi-ecosystem-groups:
     commit-message:
       prefix: chore
       include: scope
+    open-pull-requests-limit: 1
 
 updates:
   - package-ecosystem: bun
@@ -17,18 +18,15 @@ updates:
     patterns:
       - '*'
     multi-ecosystem-group: all
-    open-pull-requests-limit: 1
 
   - package-ecosystem: docker
     directory: /
     patterns:
       - '*'
     multi-ecosystem-group: all
-    open-pull-requests-limit: 1
 
   - package-ecosystem: github-actions
     directory: /
     patterns:
       - '*'
     multi-ecosystem-group: all
-    open-pull-requests-limit: 1

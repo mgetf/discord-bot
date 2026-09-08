@@ -10,6 +10,7 @@ The official Discord bot for the [mge.tf](https://mge.tf) community.
 
 - **Account Verification** — Users link their Discord on mge.tf, then run `/verify` to automatically receive server roles. Supports cross-checking profile URLs and provides detailed feedback when links don't match.
 - **Alt Account Detection** — `/altcheck` cross-references shared-IP whois databases across regions to flag likely alt accounts of a given Steam ID, for use by server admins/moderators.
+- **Staff role protection** — Discord roles mapped in the mge.tf staff hub cannot be granted by hand. If someone adds one, the bot removes it and DMs them to assign it at `/admin/staff`.
 
 ## Setup
 
@@ -65,8 +66,9 @@ ALTCHECK_CHANNEL_ID=
 
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
 2. Create a new application and add a Bot user
-3. Under **Privileged Gateway Intents**, enable **Server Members Intent** (required for role assignment)
-4. Copy the bot token to `DISCORD_BOT_TOKEN`
+3. Under **Privileged Gateway Intents**, enable **Server Members Intent** (required for role assignment and staff role protection)
+4. Invite the bot with **Manage Roles**, **View Audit Log**, **Send Messages**, and **Embed Links** (the ready-handler invite link includes these)
+5. Copy the bot token to `DISCORD_BOT_TOKEN`
 
 ### 4. Generate an API Key
 
@@ -115,9 +117,11 @@ src/
 │   └── altcheck.ts   # /altcheck command
 ├── events/
 │   ├── ready.ts      # Bot ready handler
+│   ├── guild-member-update.ts  # Reverts hand-assigned staff hub roles
 │   └── interaction-create.ts  # Command router
 └── utils/
     ├── api.ts        # mge.tf API client
+    ├── managed-staff-roles.ts  # Managed staff role cache + diff helper
     ├── whois.ts      # Alt-check scoring against whois databases
     ├── core.ts       # Dynamic command/event loader
     ├── logger.ts     # Pino logger

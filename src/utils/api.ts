@@ -90,5 +90,42 @@ export const mgeApi = {
     }
 
     return (await res.json()) as UserLookupResult;
+  },
+
+  /**
+   * Discord role IDs managed by the mge.tf staff hub.
+   * Throws on network / server errors.
+   */
+  async getManagedStaffRoleIds(): Promise<string[]> {
+    const base = env.MGE_API_URL.replace(/\/+$/, '');
+    const url = `${base}/api/v1/staff/discord-managed-roles`;
+
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        headers: { Authorization: `Bearer ${env.MGE_API_KEY}` }
+      });
+    } catch (err) {
+      log.error({ err }, 'Network error calling mge.tf API');
+      throw new Error(
+        'Could not reach the mge.tf API. Please try again later.'
+      );
+    }
+
+    if (!res.ok) {
+      log.error(
+        { status: res.status, url },
+        'Unexpected response from mge.tf API'
+      );
+      throw new Error(
+        `mge.tf API returned an unexpected error (HTTP ${res.status}).`
+      );
+    }
+
+    const body = (await res.json()) as { roleIds?: unknown };
+    if (!Array.isArray(body.roleIds)) return [];
+    return body.roleIds.filter(
+      (id): id is string => typeof id === 'string' && id.length > 0
+    );
   }
 };

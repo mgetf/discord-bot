@@ -1,9 +1,10 @@
 ## Overview
 
-The **mge.tf Discord Bot** serves the mge.tf community with two features:
+The **mge.tf Discord Bot** serves the mge.tf community with three features:
 
 - **Verification** — when a user runs `/verify`, the bot calls the mge.tf external API to check whether their Discord ID is linked to an mge.tf account, then assigns configured roles on success.
 - **Alt detection** — `/altcheck` cross-references shared-IP whois databases (per region) to flag likely alt accounts of a given Steam ID.
+- **Staff role protection** — roles returned by `GET /api/v1/staff/discord-managed-roles` cannot be granted in Discord. The bot reverts those additions and tells the executor to use `/admin/staff` on mge.tf.
 
 ## Tech Stack
 
@@ -32,9 +33,11 @@ src/
 │   └── altcheck.ts   # /altcheck slash command
 ├── events/
 │   ├── ready.ts      # Bot ready handler
+│   ├── guild-member-update.ts  # Reverts hand-assigned staff hub roles
 │   └── interaction-create.ts  # Command router
 └── utils/
     ├── api.ts        # mge.tf external API client
+    ├── managed-staff-roles.ts  # 60s cache of managed staff role IDs + addedManagedRoleIds()
     ├── whois.ts      # Alt-check scoring against whois databases
     ├── core.ts       # Dynamic command/event loader
     ├── logger.ts     # Pino logger configuration
@@ -81,6 +84,8 @@ LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 ### `src/utils/api.ts`
 **mge.tf API client**. Exports `mgeApi` with:
 - `getDiscordLink(discordId)` — calls `GET /api/v1/discord/:discordId`, returns linked account or null
+- `getUserBySteamId(steamId)` — calls `GET /api/v1/users/:steamId`
+- `getManagedStaffRoleIds()` — calls `GET /api/v1/staff/discord-managed-roles`, returns `{ roleIds }`
 
 ### `src/commands/verify.ts`
 **`/verify` command**. Full flow:
@@ -149,7 +154,8 @@ export const event: Event<Events.EventName> = {
 ```
 
 ### Existing Events
-- `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `SendMessages`, `EmbedLinks`), logged in dev only
+- `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `ViewAuditLog`, `SendMessages`, `EmbedLinks`), logged in dev only. Prefetches managed staff role IDs.
+- `guild-member-update.ts`: If a managed staff hub role is added by anyone other than this bot, wait 800ms, check the MemberRoleUpdate audit log, revert the addition, and DM the executor. Removals are not reverted. Skips `oldMember.partial`. If `DISCORD_GUILD_ID` is set, only that guild is watched.
 - `interaction-create.ts`: Handles slash command interactions
 
 ---
@@ -158,6 +164,9 @@ export const event: Event<Events.EventName> = {
 
 ### `api.ts`
 **mge.tf API client**. Configure base URL and key via env. Throws on network errors, returns null on 404.
+
+### `managed-staff-roles.ts`
+**Staff hub Discord roles**. `addedManagedRoleIds(old, new, managed)` is the pure added∩managed helper. `getCachedManagedStaffRoleIds()` refreshes from `mgeApi.getManagedStaffRoleIds()` about every 60s and on `ready`.
 
 ### `whois.ts`
 **Alt-check scoring**. Connects to per-region MySQL whois databases (credentials from `WHOIS_DB_NA/EU/ASIA`, format `host:port:password`), looks up connection history for a Steam ID, and scores other accounts sharing IPs as potential alts (IP exclusivity + coverage, temporal proximity, co-presence bonuses). Detects Valve SDR relay addresses and weights those matches lower.

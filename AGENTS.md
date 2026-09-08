@@ -4,7 +4,7 @@ The **mge.tf Discord Bot** serves the mge.tf community with three features:
 
 - **Verification** — when a user runs `/verify`, the bot calls the mge.tf external API to check whether their Discord ID is linked to an mge.tf account, then assigns configured roles on success.
 - **Alt detection** — `/altcheck` cross-references shared-IP whois databases (per region) to flag likely alt accounts of a given Steam ID.
-- **Staff role protection** — roles returned by `GET /api/v1/staff/discord-managed-roles` cannot be granted in Discord. The bot reverts those additions and tells the executor to use `/admin/staff` on mge.tf.
+- **Staff role protection** — hub-managed Discord roles follow mge.tf. `GET /api/v1/staff/discord-managed-roles` is the catalog; `GET /api/v1/staff/discord-desired-roles/:discordId` is who should hold them. Manual add or remove in Discord is reconciled back to that assignment. The bot does not DM (Discord 50278/50007 when DMs from server members are off).
 
 ## Tech Stack
 
@@ -24,7 +24,7 @@ The **mge.tf Discord Bot** serves the mge.tf community with three features:
 ```
 src/
 ├── index.ts          # Entry point
-├── client.ts         # Discord Client setup (Guilds + GuildMembers intents)
+├── client.ts         # Discord Client setup (Guilds + GuildMembers + GuildMember/User partials)
 ├── env.ts            # Environment variable schema
 ├── types.d.ts        # Type definitions
 ├── deploy.ts         # Command deployment script
@@ -33,11 +33,12 @@ src/
 │   └── altcheck.ts   # /altcheck slash command
 ├── events/
 │   ├── ready.ts      # Bot ready handler
-│   ├── guild-member-update.ts  # Reverts hand-assigned staff hub roles
+│   ├── guild-member-update.ts  # Reconciles hub Discord roles to mge.tf
 │   └── interaction-create.ts  # Command router
 └── utils/
     ├── api.ts        # mge.tf external API client
-    ├── managed-staff-roles.ts  # 60s cache of managed staff role IDs + addedManagedRoleIds()
+    ├── managed-staff-roles.ts  # 60s catalog cache of hub-managed role IDs
+    ├── staff-role-diff.ts      # managedRoleReconcile() / roleIdSetsEqual()
     ├── whois.ts      # Alt-check scoring against whois databases
     ├── core.ts       # Dynamic command/event loader
     ├── logger.ts     # Pino logger configuration
@@ -56,8 +57,8 @@ src/
 4. Logs into Discord
 
 ### `src/client.ts`
-**Discord Client singleton**. Enables `Guilds` and `GuildMembers` intents.
-`GuildMembers` is a Privileged Intent — it must be enabled in the Discord Developer Portal.
+**Discord Client singleton**. Enables `Guilds` and `GuildMembers` intents, plus `Partials.GuildMember` and `Partials.User`.
+`GuildMembers` is a Privileged Intent — it must be enabled in the Discord Developer Portal. Without the GuildMember partial, discord.js does not emit `GuildMemberUpdate` for members that were not already in cache (first role change is dropped).
 
 ### `src/env.ts`
 **Environment variable validation**. Type-safe with Zod schema.
@@ -155,7 +156,7 @@ export const event: Event<Events.EventName> = {
 
 ### Existing Events
 - `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `ViewAuditLog`, `SendMessages`, `EmbedLinks`), logged in dev only. Prefetches managed staff role IDs.
-- `guild-member-update.ts`: If a managed staff hub role is added by anyone other than this bot, wait 800ms, check the MemberRoleUpdate audit log, revert the addition, and DM the executor. Removals are not reverted. Skips `oldMember.partial`. If `DISCORD_GUILD_ID` is set, only that guild is watched.
+- `guild-member-update.ts`: On role changes, load desired hub roles from mge.tf and add/remove until Discord matches. Nickname-only updates are skipped when `oldMember` is cached. Uncached members still reconcile (partials). If `DISCORD_GUILD_ID` is set, only that guild is watched.
 - `interaction-create.ts`: Handles slash command interactions
 
 ---
@@ -163,10 +164,10 @@ export const event: Event<Events.EventName> = {
 ## `src/utils/` - Utilities
 
 ### `api.ts`
-**mge.tf API client**. Configure base URL and key via env. Throws on network errors, returns null on 404.
+**mge.tf API client**. Configure base URL and key via env. User lookups return null on 404. Staff catalog / desired-role routes throw on HTTP errors (a 404 means the website endpoint is not deployed).
 
 ### `managed-staff-roles.ts`
-**Staff hub Discord roles**. `addedManagedRoleIds(old, new, managed)` is the pure added∩managed helper. `getCachedManagedStaffRoleIds()` refreshes from `mgeApi.getManagedStaffRoleIds()` about every 60s and on `ready`.
+**Staff hub Discord roles**. `managedRoleReconcile(current, desired, managed)` in `staff-role-diff.ts` is the add/remove diff. `getCachedManagedStaffRoleIds()` refreshes from `mgeApi.getManagedStaffRoleIds()` about every 60s and on `ready`; failed fetches are cached for the same TTL so a missing website route is not hammered on every member update.
 
 ### `whois.ts`
 **Alt-check scoring**. Connects to per-region MySQL whois databases (credentials from `WHOIS_DB_NA/EU/ASIA`, format `host:port:password`), looks up connection history for a Steam ID, and scores other accounts sharing IPs as potential alts (IP exclusivity + coverage, temporal proximity, co-presence bonuses). Detects Valve SDR relay addresses and weights those matches lower.

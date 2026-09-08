@@ -117,15 +117,56 @@ export const mgeApi = {
         { status: res.status, url },
         'Unexpected response from mge.tf API'
       );
+      throw new Error(catalogHttpError(res.status, url));
+    }
+
+    return parseRoleIds(await res.json());
+  },
+
+  /**
+   * Hub-managed Discord role IDs this Discord user should have on mge.tf.
+   * Empty array when the user is unlinked or not designated staff.
+   */
+  async getDesiredStaffRoleIds(discordId: string): Promise<string[]> {
+    const base = env.MGE_API_URL.replace(/\/+$/, '');
+    const url = `${base}/api/v1/staff/discord-desired-roles/${encodeURIComponent(discordId)}`;
+
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        headers: { Authorization: `Bearer ${env.MGE_API_KEY}` }
+      });
+    } catch (err) {
+      log.error({ err }, 'Network error calling mge.tf API');
       throw new Error(
-        `mge.tf API returned an unexpected error (HTTP ${res.status}).`
+        'Could not reach the mge.tf API. Please try again later.'
       );
     }
 
-    const body = (await res.json()) as { roleIds?: unknown };
-    if (!Array.isArray(body.roleIds)) return [];
-    return body.roleIds.filter(
-      (id): id is string => typeof id === 'string' && id.length > 0
-    );
+    if (!res.ok) {
+      log.error(
+        { status: res.status, url },
+        'Unexpected response from mge.tf API'
+      );
+      throw new Error(catalogHttpError(res.status, url));
+    }
+
+    return parseRoleIds(await res.json());
   }
 };
+
+function parseRoleIds(body: unknown): string[] {
+  if (!body || typeof body !== 'object' || !('roleIds' in body)) return [];
+  const roleIds = (body as { roleIds?: unknown }).roleIds;
+  if (!Array.isArray(roleIds)) return [];
+  return roleIds.filter(
+    (id): id is string => typeof id === 'string' && id.length > 0
+  );
+}
+
+function catalogHttpError(status: number, url: string): string {
+  if (status === 404) {
+    return `mge.tf is missing ${url} (HTTP 404). Staff Discord role guard cannot run until that API is live.`;
+  }
+  return `mge.tf API returned an unexpected error (HTTP ${status}).`;
+}

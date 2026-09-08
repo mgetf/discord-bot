@@ -1,9 +1,11 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, Partials } from 'discord.js';
 
 export const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    // Required for role assignment via interaction.member.roles.add()
+    // Privileged. Required for GuildMemberUpdate (role changes) per Discord gateway docs.
     GatewayIntentBits.GuildMembers
-  ]
+  ],
+  // Without GuildMember, discord.js does not emit GuildMemberUpdate for uncached members.
+  partials: [Partials.GuildMember, Partials.User]
 });

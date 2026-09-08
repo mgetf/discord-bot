@@ -29,7 +29,7 @@ export const event: Event<Events.ClientReady> = {
         'Cached managed staff Discord role IDs'
       );
     } catch (err) {
-      log.warn({ err }, 'Failed to prefetch managed staff role IDs');
+      log.error({ err }, 'Failed to prefetch managed staff role IDs');
     }
   }
 };

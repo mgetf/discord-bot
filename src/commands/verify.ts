@@ -1,58 +1,34 @@
 import {
   type ChatInputCommandInteraction,
-  EmbedBuilder,
   GuildMember,
   MessageFlags,
-  SlashCommandBuilder,
-  TextChannel
+  SlashCommandBuilder
 } from 'discord.js';
 import { env } from '@/env';
 import type { Command } from '@/types';
 import { mgeApi } from '@/utils/api';
 import { logger } from '@/utils/logger';
+import {
+  applyVerificationRoles,
+  sendVerificationLog
+} from '@/utils/verification';
 
 const log = logger.child({ name: 'commands/verify' });
 
 const STEAM_ID_REGEX = /\/users\/(\d{17})/;
-
-const Colors = {
-  Success: 0x57f287,
-  Failure: 0xed4245,
-  Warning: 0xfee75c
-} as const;
-
-async function sendVerificationLog(
-  interaction: ChatInputCommandInteraction,
-  { success, description }: { success: boolean; description: string }
-) {
-  if (!env.VERIFICATION_LOG_CHANNEL_ID) return;
-
-  try {
-    const channel = await interaction.client.channels.fetch(
-      env.VERIFICATION_LOG_CHANNEL_ID
-    );
-
-    if (!(channel instanceof TextChannel)) return;
-
-    const embed = new EmbedBuilder()
-      .setColor(success ? Colors.Success : Colors.Failure)
-      .setAuthor({
-        name: interaction.user.tag,
-        iconURL: interaction.user.displayAvatarURL()
-      })
-      .setDescription(description)
-      .setTimestamp();
-
-    await channel.send({ embeds: [embed] });
-  } catch (err) {
-    log.error({ err }, 'Failed to send verification log');
-  }
-}
+const VERIFY_REASON = 'mge.tf /verify';
+const LINK_INSTRUCTIONS =
+  'To link your account:\n' +
+  '1. Log in at <https://mge.tf>\n' +
+  '2. Open your profile and click **Link Discord**\n' +
+  '3. Roles are applied automatically. You can run `/verify` if they are missing.';
 
 export const command: Command<ChatInputCommandInteraction> = {
   data: new SlashCommandBuilder()
     .setName('verify')
-    .setDescription('Link your mge.tf account and receive the Verified role.')
+    .setDescription(
+      'Confirm your mge.tf Discord link and receive the MGER role.'
+    )
     .addStringOption((option) =>
       option
         .setName('profile')
@@ -63,7 +39,6 @@ export const command: Command<ChatInputCommandInteraction> = {
     ),
 
   execute: async (interaction) => {
-    // Restrict to the configured verification channel if set
     if (
       env.VERIFICATION_CHANNEL_ID &&
       interaction.channelId !== env.VERIFICATION_CHANNEL_ID
@@ -87,7 +62,6 @@ export const command: Command<ChatInputCommandInteraction> = {
 
     const profileArg = interaction.options.getString('profile');
 
-    // Parse Steam ID from the profile URL when one was provided
     let providedSteamId: string | null = null;
     if (profileArg) {
       const match = STEAM_ID_REGEX.exec(profileArg);
@@ -112,16 +86,15 @@ export const command: Command<ChatInputCommandInteraction> = {
       return;
     }
 
-    // No linked account found
     if (!linkedAccount) {
-      // If a profile URL was provided, look up that account to give a better message
       if (providedSteamId) {
         try {
           const profileUser = await mgeApi.getUserBySteamId(providedSteamId);
 
           if (!profileUser) {
-            await sendVerificationLog(interaction, {
+            await sendVerificationLog(interaction.client, {
               success: false,
+              user: interaction.user,
               description: `Provided profile \`${providedSteamId}\` — no mge.tf account found.`
             });
             await interaction.editReply(
@@ -134,28 +107,27 @@ export const command: Command<ChatInputCommandInteraction> = {
             profileUser.discordId &&
             profileUser.discordId !== interaction.user.id
           ) {
-            await sendVerificationLog(interaction, {
+            await sendVerificationLog(interaction.client, {
               success: false,
+              user: interaction.user,
               description: `Provided profile **${profileUser.steamUsername}** (\`${providedSteamId}\`) — linked to a different Discord account (**${profileUser.discordUsername ?? 'unknown'}**).`
             });
             await interaction.editReply(
               `The mge.tf account **${profileUser.steamUsername}** (\`${providedSteamId}\`) is linked to a different Discord account (**${profileUser.discordUsername ?? 'unknown'}**).\n\n` +
-                'If this is your mge.tf account, please contact an admin to have the old Discord account unlinked.'
+                'If this is your mge.tf account, unlink Discord from your profile at <https://mge.tf> or contact an admin.'
             );
             return;
           }
 
           if (!profileUser.discordId) {
-            await sendVerificationLog(interaction, {
+            await sendVerificationLog(interaction.client, {
               success: false,
+              user: interaction.user,
               description: `Provided profile **${profileUser.steamUsername}** (\`${providedSteamId}\`) — no Discord account linked on mge.tf.`
             });
             await interaction.editReply(
               `The mge.tf account **${profileUser.steamUsername}** (\`${providedSteamId}\`) exists but has no Discord account linked.\n\n` +
-                'To link your account:\n' +
-                '1. Log in at <https://mge.tf>\n' +
-                '2. Go to your profile and click **Link Discord Account**\n' +
-                '3. Run `/verify` again once linked'
+                LINK_INSTRUCTIONS
             );
             return;
           }
@@ -164,24 +136,22 @@ export const command: Command<ChatInputCommandInteraction> = {
         }
       }
 
-      await sendVerificationLog(interaction, {
+      await sendVerificationLog(interaction.client, {
         success: false,
+        user: interaction.user,
         description: 'Discord account is not linked to any mge.tf account.'
       });
       await interaction.editReply(
         'Your Discord account is not linked to any mge.tf account.\n\n' +
-          'To link your account:\n' +
-          '1. Log in at <https://mge.tf>\n' +
-          '2. Go to your profile and click **Link Discord Account**\n' +
-          '3. Run `/verify` again once linked'
+          LINK_INSTRUCTIONS
       );
       return;
     }
 
-    // If a profile URL was provided, confirm it matches the linked account
     if (providedSteamId && providedSteamId !== linkedAccount.steamId) {
-      await sendVerificationLog(interaction, {
+      await sendVerificationLog(interaction.client, {
         success: false,
+        user: interaction.user,
         description: `Provided profile \`${providedSteamId}\` does not match linked account **${linkedAccount.steamUsername}** (\`${linkedAccount.steamId}\`).`
       });
       await interaction.editReply(
@@ -191,20 +161,16 @@ export const command: Command<ChatInputCommandInteraction> = {
       return;
     }
 
-    // Update roles on verification
     try {
-      const { roles } = interaction.member;
-      await Promise.all([
-        ...env.VERIFY_ADD_ROLE_IDS.map((id) => roles.add(id)),
-        ...env.VERIFY_REMOVE_ROLE_IDS.map((id) => roles.remove(id))
-      ]);
+      await applyVerificationRoles(interaction.member, true, VERIFY_REASON);
     } catch (err) {
       log.error(
         { err, userId: interaction.user.id },
         'Failed to update roles during verification'
       );
-      await sendVerificationLog(interaction, {
+      await sendVerificationLog(interaction.client, {
         success: false,
+        user: interaction.user,
         description: `Linked to **${linkedAccount.steamUsername}** (\`${linkedAccount.steamId}\`) but failed to update roles.`
       });
       await interaction.editReply(
@@ -222,8 +188,9 @@ export const command: Command<ChatInputCommandInteraction> = {
       'User verified successfully'
     );
 
-    await sendVerificationLog(interaction, {
+    await sendVerificationLog(interaction.client, {
       success: true,
+      user: interaction.user,
       description: `Verified as **${linkedAccount.steamUsername}** (\`${linkedAccount.steamId}\`). [Profile](https://mge.tf/users/${linkedAccount.steamId})`
     });
 

@@ -2,7 +2,7 @@
 
 The **mge.tf Discord Bot** serves the mge.tf community with three features:
 
-- **Verification** — when a user runs `/verify`, the bot calls the mge.tf external API to check whether their Discord ID is linked to an mge.tf account, then assigns configured roles on success.
+- **Verification** — linking Discord on mge.tf grants **MGER** and removes **Unverified**. Unlinking reverses that. `/verify` remains a fallback. The bot also verifies on guild join when the Discord ID is already linked.
 - **Alt detection** — `/altcheck` cross-references shared-IP whois databases (per region) to flag likely alt accounts of a given Steam ID.
 - **Staff role protection** — hub-managed Discord roles follow mge.tf. `GET /api/v1/staff/discord-managed-roles` is the catalog; `GET /api/v1/staff/discord-desired-roles/:discordId` is who should hold them. Manual add or remove in Discord is reconciled back to that assignment. The bot does not DM (Discord 50278/50007 when DMs from server members are off).
 
@@ -33,12 +33,14 @@ src/
 │   └── altcheck.ts   # /altcheck slash command
 ├── events/
 │   ├── ready.ts      # Bot ready handler
-│   ├── guild-member-update.ts  # Reconciles hub Discord roles to mge.tf
+│   ├── guild-member-add.ts     # Auto-verify members whose Discord is linked on mge.tf
+│   ├── guild-member-update.ts  # Reconciles hub Discord roles to mge.tf; verifies after membership screening
 │   └── interaction-create.ts  # Command router
 └── utils/
     ├── api.ts        # mge.tf external API client
     ├── managed-staff-roles.ts  # 60s catalog cache of hub-managed role IDs
     ├── staff-role-diff.ts      # managedRoleReconcile() / roleIdSetsEqual()
+    ├── verification.ts  # MGER / Unverified role diff, apply, join/link helper
     ├── whois.ts      # Alt-check scoring against whois databases
     ├── core.ts       # Dynamic command/event loader
     ├── logger.ts     # Pino logger configuration
@@ -89,11 +91,11 @@ LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 - `getManagedStaffRoleIds()` — calls `GET /api/v1/staff/discord-managed-roles`, returns `{ roleIds }`
 
 ### `src/commands/verify.ts`
-**`/verify` command**. Full flow:
+**`/verify` command**. Fallback if auto-verify missed the member.
 1. Optionally restricts to `VERIFICATION_CHANNEL_ID`
 2. Calls `mgeApi.getDiscordLink(interaction.user.id)`
 3. If a `profile` URL argument was provided, cross-checks the Steam ID
-4. Assigns `VERIFIED_ROLE_ID` via `interaction.member.roles.add()`
+4. Assigns `VERIFY_ADD_ROLE_IDS` (MGER) and removes `VERIFY_REMOVE_ROLE_IDS` (Unverified)
 5. All replies are ephemeral
 
 ### `src/commands/altcheck.ts`
@@ -156,7 +158,8 @@ export const event: Event<Events.EventName> = {
 
 ### Existing Events
 - `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `ViewAuditLog`, `SendMessages`, `EmbedLinks`), logged in dev only. Prefetches managed staff role IDs.
-- `guild-member-update.ts`: On role changes, load desired hub roles from mge.tf and add/remove until Discord matches. Nickname-only updates are skipped when `oldMember` is cached. Uncached members still reconcile (partials). If `DISCORD_GUILD_ID` is set, only that guild is watched.
+- `guild-member-add.ts`: If the joining member's Discord ID is linked on mge.tf, grant MGER and remove Unverified.
+- `guild-member-update.ts`: On role changes, load desired hub roles from mge.tf and add/remove until Discord matches. Nickname-only updates are skipped when `oldMember` is cached. Uncached members still reconcile (partials). After membership screening (`pending` → not pending), runs the same auto-verify as join. If `DISCORD_GUILD_ID` is set, only that guild is watched.
 - `interaction-create.ts`: Handles slash command interactions
 
 ---

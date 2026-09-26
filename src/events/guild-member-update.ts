@@ -9,9 +9,11 @@ import {
   managedRoleReconcile,
   roleIdSetsEqual
 } from '@/utils/managed-staff-roles';
+import { verifyLinkedMember } from '@/utils/verification';
 
 const log = logger.child({ name: 'events/guild-member-update' });
 const REVERT_REASON = 'Staff roles are assigned from mge.tf /admin/staff';
+const VERIFY_REASON = 'mge.tf Discord linked';
 
 export const event: Event<Events.GuildMemberUpdate> = {
   name: Events.GuildMemberUpdate,
@@ -19,6 +21,10 @@ export const event: Event<Events.GuildMemberUpdate> = {
   execute: async (oldMember, newMember) => {
     if (env.DISCORD_GUILD_ID && newMember.guild.id !== env.DISCORD_GUILD_ID) {
       return;
+    }
+
+    if (!oldMember.partial && oldMember.pending && !newMember.pending) {
+      await verifyLinkedMember(newMember, VERIFY_REASON);
     }
 
     const currentRoleIds = [...newMember.roles.cache.keys()];

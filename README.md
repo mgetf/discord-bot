@@ -8,7 +8,7 @@ The official Discord bot for the [mge.tf](https://mge.tf) community.
 
 ## Features
 
-- **Account Verification** — Users link their Discord on mge.tf, then run `/verify` to automatically receive server roles. Supports cross-checking profile URLs and provides detailed feedback when links don't match.
+- **Account Verification** — Users link Discord on mge.tf and receive **MGER** automatically. Unlinking restores **Unverified**. `/verify` is a fallback if roles were missed.
 - **Alt Account Detection** — `/altcheck` cross-references shared-IP whois databases across regions to flag likely alt accounts of a given Steam ID, for use by server admins/moderators.
 - **Staff role protection** — Discord roles mapped in the mge.tf staff hub cannot be granted by hand. If someone adds one, the bot removes it and DMs them to assign it at `/admin/staff`.
 
@@ -117,11 +117,13 @@ src/
 │   └── altcheck.ts   # /altcheck command
 ├── events/
 │   ├── ready.ts      # Bot ready handler
+│   ├── guild-member-add.ts     # Auto-verify linked members on join
 │   ├── guild-member-update.ts  # Reverts hand-assigned staff hub roles
 │   └── interaction-create.ts  # Command router
 └── utils/
     ├── api.ts        # mge.tf API client
     ├── managed-staff-roles.ts  # Managed staff role cache + diff helper
+    ├── verification.ts  # MGER / Unverified role apply helper
     ├── whois.ts      # Alt-check scoring against whois databases
     ├── core.ts       # Dynamic command/event loader
     ├── logger.ts     # Pino logger

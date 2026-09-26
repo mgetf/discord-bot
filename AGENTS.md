@@ -2,9 +2,9 @@
 
 The **mge.tf Discord Bot** serves the mge.tf community with three features:
 
-- **Verification** — linking Discord on mge.tf grants **MGER** and removes **Unverified**. Unlinking reverses that. `/verify` remains a fallback. The bot also verifies on guild join when the Discord ID is already linked.
+- **Verification** — linking Discord on mge.tf grants **MGER** and removes **Unverified**. Unlinking reverses that. The bot DMs the user when roles change. `/verify` remains a fallback. The bot also verifies on guild join when the Discord ID is already linked.
 - **Alt detection** — `/altcheck` cross-references shared-IP whois databases (per region) to flag likely alt accounts of a given Steam ID.
-- **Staff role protection** — hub-managed Discord roles follow mge.tf. `GET /api/v1/staff/discord-managed-roles` is the catalog; `GET /api/v1/staff/discord-desired-roles/:discordId` is who should hold them. Manual add or remove in Discord is reconciled back to that assignment. The bot does not DM (Discord 50278/50007 when DMs from server members are off).
+- **Staff role protection** — hub-managed Discord roles follow mge.tf. `GET /api/v1/staff/discord-managed-roles` is the catalog; `GET /api/v1/staff/discord-desired-roles/:discordId` is who should hold them. Manual add or remove in Discord is reconciled back to that assignment. Verification DMs are best-effort; Discord 50007 is ignored when the user has DMs from server members closed.
 
 ## Tech Stack
 
@@ -158,7 +158,7 @@ export const event: Event<Events.EventName> = {
 
 ### Existing Events
 - `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `ViewAuditLog`, `SendMessages`, `EmbedLinks`), logged in dev only. Prefetches managed staff role IDs.
-- `guild-member-add.ts`: If the joining member's Discord ID is linked on mge.tf, grant MGER and remove Unverified.
+- `guild-member-add.ts`: If the joining member's Discord ID is linked on mge.tf, grant MGER, remove Unverified, and DM them.
 - `guild-member-update.ts`: On role changes, load desired hub roles from mge.tf and add/remove until Discord matches. Nickname-only updates are skipped when `oldMember` is cached. Uncached members still reconcile (partials). After membership screening (`pending` → not pending), runs the same auto-verify as join. If `DISCORD_GUILD_ID` is set, only that guild is watched.
 - `interaction-create.ts`: Handles slash command interactions
 

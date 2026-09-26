@@ -84,6 +84,17 @@ export async function sendVerificationLog(
   }
 }
 
+export async function sendVerificationDm(
+  user: User,
+  content: string
+): Promise<void> {
+  try {
+    await user.send(content);
+  } catch (err) {
+    log.info({ err, userId: user.id }, 'Could not DM verification update');
+  }
+}
+
 export async function verifyLinkedMember(
   member: GuildMember,
   reason: string
@@ -116,11 +127,17 @@ export async function verifyLinkedMember(
     );
 
     const origin = env.MGE_API_URL.replace(/\/+$/, '');
-    await sendVerificationLog(member.client, {
-      success: true,
-      user: member.user,
-      description: `Verified as **${linked.steamUsername}** (\`${linked.steamId}\`). [Profile](${origin}/users/${linked.steamId})`
-    });
+    await Promise.all([
+      sendVerificationLog(member.client, {
+        success: true,
+        user: member.user,
+        description: `Verified as **${linked.steamUsername}** (\`${linked.steamId}\`). [Profile](${origin}/users/${linked.steamId})`
+      }),
+      sendVerificationDm(
+        member.user,
+        'Hey, we noticed your Discord is linked on mge.tf, so we gave you the **MGER** role. You are all set.'
+      )
+    ]);
   } catch (err) {
     log.error(
       { err, memberId: member.id },

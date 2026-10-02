@@ -1,0 +1,937 @@
+{
+  "channelCount": 223,
+  "liveMemberOverwriteCount": 65,
+  "archiveMemberOverwriteCount": 79,
+  "uniqueMembers": 59,
+  "leftServerCount": 0,
+  "emptyOverwriteCount": 5,
+  "oddRoleOverwriteCount": 1,
+  "liveMembersByChannel": [
+    {
+      "channel": "Ôû¼Ôû¼ MISC Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #na-1v1-payout-info",
+      "count": 15,
+      "people": [
+        {
+          "username": "wckid",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "mopsy_y",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": ".yesod",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "zelfmoordenaar",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "jmarcus2017",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": ".s.o.x.",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "knightkazuma",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "hallu.cina",
+          "nick": "hallu",
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "sexhaver4205969",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "splashbruhbruh",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "melissabalm",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "_mobe",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "0812f",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "batterbug",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "tf2formosa",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ MISC Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #na-2v2-payout-info",
+      "count": 11,
+      "people": [
+        {
+          "username": "4forfoe",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "0812f",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": ".yesod",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "hallu.cina",
+          "nick": "hallu",
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "skullcandydealer_2",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "dimbot_",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "jboy1230446",
+          "nick": "fm",
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "soul1234",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "knightkazuma",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "aetbitt",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "pizza_hat",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒîÉ´¢£ADMINISTRATION / GUILD_TEXT #Òâ╗south-america-admins",
+      "count": 6,
+      "people": [
+        {
+          "username": "dev1lwalk",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "gabriel420_",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": ".yesod",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "queen_ofthesun",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        },
+        {
+          "username": "aboood_",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1040",
+          "deny": "0"
+        },
+        {
+          "username": "alleyeson_",
+          "nick": "rch_",
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ MISC Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #docket",
+      "count": 4,
+      "people": [
+        {
+          "username": "judge",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "aboood_",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "drago9773",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "tommyy_hla",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ MISC Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #case-plugin-to-drain-health-if-x-time-has-passed-in",
+      "count": 4,
+      "people": [
+        {
+          "username": "aboood_",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "drago9773",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "amperetf",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "tommyy_hla",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ MISC Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #case-leaving-early-counts-as-loss-even-ahead-in-score",
+      "count": 4,
+      "people": [
+        {
+          "username": "aboood_",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "drago9773",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "amperetf",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        },
+        {
+          "username": "tommyy_hla",
+          "nick": null,
+          "inGuild": true,
+          "allow": "117760",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒîÉ´¢£ADMINISTRATION / GUILD_TEXT #Òâ╗head-admins",
+      "count": 3,
+      "people": [
+        {
+          "username": "aboood_",
+          "nick": null,
+          "inGuild": true,
+          "allow": "3072",
+          "deny": "0"
+        },
+        {
+          "username": "amperetf",
+          "nick": null,
+          "inGuild": true,
+          "allow": "0",
+          "deny": "3072"
+        },
+        {
+          "username": "tommyy_hla",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ MISC Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #closed-case-elo-vs-glicko",
+      "count": 3,
+      "people": [
+        {
+          "username": "aboood_",
+          "nick": null,
+          "inGuild": true,
+          "allow": "66560",
+          "deny": "2048"
+        },
+        {
+          "username": "tommyy_hla",
+          "nick": null,
+          "inGuild": true,
+          "allow": "66560",
+          "deny": "2048"
+        },
+        {
+          "username": "drago9773",
+          "nick": null,
+          "inGuild": true,
+          "allow": "66560",
+          "deny": "2048"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒÄ½´¢£TICKETS / GUILD_TEXT #ticket-0584",
+      "count": 2,
+      "people": [
+        {
+          "username": "toomu4",
+          "nick": null,
+          "inGuild": true,
+          "allow": "3072",
+          "deny": "0"
+        },
+        {
+          "username": "Ticket Tool",
+          "nick": null,
+          "inGuild": true,
+          "allow": "257040",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒÄ½´¢£TICKETS / GUILD_TEXT #ticket-0603",
+      "count": 2,
+      "people": [
+        {
+          "username": "kubusiek8",
+          "nick": "hehe xd",
+          "inGuild": true,
+          "allow": "3072",
+          "deny": "0"
+        },
+        {
+          "username": "Ticket Tool",
+          "nick": null,
+          "inGuild": true,
+          "allow": "257040",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒÄ½´¢£TICKETS / GUILD_TEXT #ticket-0604",
+      "count": 2,
+      "people": [
+        {
+          "username": "couch_potato238",
+          "nick": null,
+          "inGuild": true,
+          "allow": "3072",
+          "deny": "0"
+        },
+        {
+          "username": "Ticket Tool",
+          "nick": null,
+          "inGuild": true,
+          "allow": "257040",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒÄ½´¢£TICKETS / GUILD_TEXT #ticket-0605",
+      "count": 2,
+      "people": [
+        {
+          "username": "st6xy",
+          "nick": "st6xy",
+          "inGuild": true,
+          "allow": "3072",
+          "deny": "0"
+        },
+        {
+          "username": "Ticket Tool",
+          "nick": null,
+          "inGuild": true,
+          "allow": "257040",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒÄ½´¢£TICKETS / GUILD_TEXT #ticket-0606",
+      "count": 2,
+      "people": [
+        {
+          "username": "nvm12345",
+          "nick": null,
+          "inGuild": true,
+          "allow": "3072",
+          "deny": "0"
+        },
+        {
+          "username": "Ticket Tool",
+          "nick": null,
+          "inGuild": true,
+          "allow": "257040",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒøá´©Å´¢£DEVELOPMENT / GUILD_TEXT #Òâ╗dev-chat",
+      "count": 1,
+      "people": [
+        {
+          "username": "amperetf",
+          "nick": null,
+          "inGuild": true,
+          "allow": "3072",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒøá´©Å´¢£DEVELOPMENT / GUILD_TEXT #Òâ╗server-bot",
+      "count": 1,
+      "people": [
+        {
+          "username": "sonikro",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒøá´©Å´¢£DEVELOPMENT / GUILD_TEXT #Òâ╗github-updates",
+      "count": 1,
+      "people": [
+        {
+          "username": "amperetf",
+          "nick": null,
+          "inGuild": true,
+          "allow": "3072",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒøá´©Å´¢£DEVELOPMENT / GUILD_TEXT #Òâ╗verification-logs",
+      "count": 1,
+      "people": [
+        {
+          "username": "amperetf",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        }
+      ]
+    },
+    {
+      "channel": "­ƒîÉ´¢£ADMINISTRATION / GUILD_TEXT #Òâ╗tf2-maps",
+      "count": 1,
+      "people": [
+        {
+          "username": "doublefugue",
+          "nick": null,
+          "inGuild": true,
+          "allow": "1024",
+          "deny": "0"
+        }
+      ]
+    }
+  ],
+  "archiveMembersByChannel": [
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #day-2-info",
+      "count": 13,
+      "people": [
+        "masterofpenguins",
+        "habib6god",
+        "kobe1920",
+        "soar8381",
+        "b4nny",
+        "hallu.cina",
+        "yumyumyumyumyumyum",
+        "wqya",
+        "klsz",
+        "alexandrostf2",
+        "slemnish",
+        "rekuso",
+        "scratchh"
+      ]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #tourney-announcement",
+      "count": 7,
+      "people": [
+        "hero1nwater",
+        "scratchh",
+        "menwithnolegs",
+        "funruiner69",
+        "onetyz_32",
+        "yumyumyumyumyumyum",
+        "tommyy_hla"
+      ]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #results",
+      "count": 7,
+      "people": [
+        "hero1nwater",
+        "tommyy_hla",
+        "menwithnolegs",
+        "funruiner69",
+        "onetyz_32",
+        "yumyumyumyumyumyum",
+        "scratchh"
+      ]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-yumyum-vs-fancy",
+      "count": 2,
+      "people": ["yumyumyumyumyumyum", "fancy9869"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-1-b4nny-vs-jw",
+      "count": 2,
+      "people": ["true_catholic", "b4nny"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-habib-vs-scratchh",
+      "count": 2,
+      "people": ["habib6god", "scratchh"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-rekuso-vs-guyehh",
+      "count": 2,
+      "people": ["guyehhh", "rekuso"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-tresh-vs-mobe",
+      "count": 2,
+      "people": ["_mobe", "masterofpenguins"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-2-yumyum-vs-ziaa",
+      "count": 2,
+      "people": ["ziamangry", "yumyumyumyumyumyum"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-2-b4nny-vs-scratchh",
+      "count": 2,
+      "people": ["b4nny", "scratchh"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round2-habib-vs-mobe",
+      "count": 2,
+      "people": ["habib6god", "_mobe"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-2-hallu-vs-tresh",
+      "count": 2,
+      "people": ["hallu.cina", "masterofpenguins"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-3-yumyum-vs-scratchh",
+      "count": 2,
+      "people": ["yumyumyumyumyumyum", "scratchh"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-3-b4nny-vs-ziaa",
+      "count": 2,
+      "people": ["ziamangry", "b4nny"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-3-habib-vs-guyehhh",
+      "count": 2,
+      "people": ["habib6god", "guyehhh"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-5-tresh-vs-guyehh",
+      "count": 2,
+      "people": ["guyehhh", "masterofpenguins"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-yalin-vs-alexandros",
+      "count": 2,
+      "people": ["klsz", "alexandrostf2"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-tresh-vs-soar",
+      "count": 2,
+      "people": ["soar8381", "masterofpenguins"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round2-tresh-vs-scratch",
+      "count": 2,
+      "people": ["masterofpenguins", "scratchh"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round2-habib-vs-slem",
+      "count": 2,
+      "people": ["habib6god", "slemnish"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #yumyum-v-higher",
+      "count": 2,
+      "people": ["wqya", "yumyumyumyumyumyum"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-hallu-vs-sandblast",
+      "count": 1,
+      "people": ["hallu.cina"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-wgsilvo-vs-ziaa",
+      "count": 1,
+      "people": ["ziamangry"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round2-wgsilvo-vs-guyehhh",
+      "count": 1,
+      "people": ["guyehhh"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round2-fancy-vs-esper",
+      "count": 1,
+      "people": ["fancy9869"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round2-jw-vs-sandblast",
+      "count": 1,
+      "people": ["true_catholic"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-2-botmode-vs-rekuso",
+      "count": 1,
+      "people": ["rekuso"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-3-hallu-vs-botmode",
+      "count": 1,
+      "people": ["hallu.cina"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round4-sandblast-vs-ziaa",
+      "count": 1,
+      "people": ["ziamangry"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round4-esper-vs-guyehhh",
+      "count": 1,
+      "people": ["guyehhh"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-4-botmode-vs-scratchh",
+      "count": 1,
+      "people": ["scratchh"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-5-botmode-vs-mobe",
+      "count": 1,
+      "people": ["_mobe"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round-5-rekuso-vs-sandblast",
+      "count": 1,
+      "people": ["rekuso"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-rekuso-vs-botmode",
+      "count": 1,
+      "people": ["rekuso"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-send-vs-habib",
+      "count": 1,
+      "people": ["habib6god"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round2-b4nny-vs-botmode",
+      "count": 1,
+      "people": ["b4nny"]
+    },
+    {
+      "channel": "Ôû¼Ôû¼ ARCHIVE Ôû¼Ôû¼Ôû¼Ôû¼Ôû¼ / GUILD_TEXT #round1-hallu-vs-jt",
+      "count": 1,
+      "people": ["hallu.cina"]
+    }
+  ],
+  "categoryMemberOverwrites": [],
+  "empty": [
+    {
+      "area": "live",
+      "category": "­ƒÆ¼´¢£COMMUNITY",
+      "channel": "GUILD_TEXT #­ƒÆ¡Òâ╗feedback",
+      "channelId": "1198787512303353986",
+      "target": "@everyone",
+      "kind": "role",
+      "id": "1172639313649995777"
+    },
+    {
+      "area": "live",
+      "category": "­ƒîÉ´¢£ADMINISTRATION",
+      "channel": "GUILD_TEXT #Òâ╗mod-chat",
+      "channelId": "1199784494681575494",
+      "target": "Ticket Tool",
+      "kind": "role",
+      "id": "1422000591806398515"
+    },
+    {
+      "area": "live",
+      "category": "­ƒîì´¢£REGIONS",
+      "channel": "GUILD_ANNOUNCEMENT #­ƒôóÒâ╗eu-announcements",
+      "channelId": "1259963598097350728",
+      "target": "Admin",
+      "kind": "role",
+      "id": "1172646210193068092"
+    },
+    {
+      "area": "live",
+      "category": "­ƒº¬´¢£TESTING",
+      "channel": "GUILD_TEXT #Òâ╗feedback-vscript",
+      "channelId": "1449502846130065579",
+      "target": "Moderator",
+      "kind": "role",
+      "id": "1263277692887892060"
+    },
+    {
+      "area": "live",
+      "category": "­ƒº¬´¢£TESTING",
+      "channel": "GUILD_ANNOUNCEMENT #testing-announcements",
+      "channelId": "1449779916735381615",
+      "target": "[NA] 1v1 Champion 2025",
+      "kind": "role",
+      "id": "1399240120111992894"
+    }
+  ],
+  "oddRoles": [
+    {
+      "area": "live",
+      "category": "­ƒº¬´¢£TESTING",
+      "channel": "GUILD_ANNOUNCEMENT #testing-announcements",
+      "channelId": "1449779916735381615",
+      "role": "[NA] 1v1 Champion 2025",
+      "allow": "0",
+      "deny": "0"
+    }
+  ],
+  "roleOverwriteCounts": [
+    {
+      "role": "@everyone",
+      "count": 221
+    },
+    {
+      "role": "Admin",
+      "count": 79
+    },
+    {
+      "role": "Unverified",
+      "count": 34
+    },
+    {
+      "role": "Moderator",
+      "count": 33
+    },
+    {
+      "role": "MGER",
+      "count": 11
+    },
+    {
+      "role": "Caster",
+      "count": 9
+    },
+    {
+      "role": "Dev",
+      "count": 9
+    },
+    {
+      "role": "Bball Admin",
+      "count": 8
+    },
+    {
+      "role": "Map creator",
+      "count": 8
+    },
+    {
+      "role": "Vscript",
+      "count": 6
+    },
+    {
+      "role": "Tester",
+      "count": 6
+    },
+    {
+      "role": "Europe Head Admin",
+      "count": 5
+    },
+    {
+      "role": "North America Head Admin",
+      "count": 5
+    },
+    {
+      "role": "Asia Head Admin",
+      "count": 4
+    },
+    {
+      "role": "Manager",
+      "count": 4
+    },
+    {
+      "role": "BBALLER",
+      "count": 4
+    },
+    {
+      "role": "Ticket Tool",
+      "count": 3
+    },
+    {
+      "role": "South America Head Admin",
+      "count": 2
+    },
+    {
+      "role": "Australia Head Admin",
+      "count": 2
+    },
+    {
+      "role": "TF2-QuickServer",
+      "count": 1
+    },
+    {
+      "role": "[NA] 1v1 Champion 2025",
+      "count": 1
+    }
+  ],
+  "leftServer": []
+}

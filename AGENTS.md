@@ -5,6 +5,7 @@ The **mge.tf Discord Bot** serves the mge.tf community with three features:
 - **Verification** — linking Discord on mge.tf grants **MGER** and removes **Unverified**. Unlinking reverses that. The bot DMs the user when roles change. `/verify` remains a fallback. The bot also verifies on guild join when the Discord ID is already linked.
 - **Alt detection** — `/altcheck` cross-references shared-IP whois databases (per region) to flag likely alt accounts of a given Steam ID.
 - **Staff role protection** — hub-managed Discord roles follow mge.tf. `GET /api/v1/staff/discord-managed-roles` is the catalog; `GET /api/v1/staff/discord-desired-roles/:discordId` is who should hold them. Manual add or remove in Discord is reconciled back to that assignment. Verification DMs are best-effort; Discord 50007 is ignored when the user has DMs from server members closed.
+- **AI ops chat** — allowlisted users @mention the bot (or reply to it) and an Anthropic tool loop inspects/fixes channel permission overwrites. Conversation state is in-memory per `channelId:userId` for 30 minutes.
 
 ## Tech Stack
 
@@ -24,7 +25,7 @@ The **mge.tf Discord Bot** serves the mge.tf community with three features:
 ```
 src/
 ├── index.ts          # Entry point
-├── client.ts         # Discord Client setup (Guilds + GuildMembers + GuildMember/User partials)
+├── client.ts         # Discord Client setup (Guilds + GuildMembers + GuildMessages + MessageContent)
 ├── env.ts            # Environment variable schema
 ├── types.d.ts        # Type definitions
 ├── deploy.ts         # Command deployment script
@@ -35,7 +36,16 @@ src/
 │   ├── ready.ts      # Bot ready handler
 │   ├── guild-member-add.ts     # Auto-verify members whose Discord is linked on mge.tf
 │   ├── guild-member-update.ts  # Reconciles hub Discord roles to mge.tf; verifies after membership screening
-│   └── interaction-create.ts  # Command router
+│   ├── interaction-create.ts  # Command router
+│   └── message-create.ts      # AI ops chat (@mention / reply)
+├── agent/
+│   ├── allowlist.ts      # Who may talk to the AI agent
+│   ├── sessions.ts       # In-memory conversation sessions
+│   ├── trigger.ts        # Mention / reply gate
+│   ├── permissions.ts    # Allowlisted overwrite flags
+│   ├── discord-tools.ts  # Channel inspect / overwrite tools
+│   ├── split-message.ts  # Discord 2000-char chunking
+│   └── run.ts            # Anthropic tool loop
 └── utils/
     ├── api.ts        # mge.tf external API client
     ├── managed-staff-roles.ts  # 60s catalog cache of hub-managed role IDs
@@ -81,6 +91,9 @@ WHOIS_DB_NA?: string              // host:port:password — NA whois DB for /alt
 WHOIS_DB_EU?: string              // host:port:password — EU whois DB for /altcheck
 WHOIS_DB_ASIA?: string            // host:port:password — Asia whois DB for /altcheck
 ALTCHECK_CHANNEL_ID?: string      // Restrict /altcheck to one channel
+AGENT_ALLOWED_USER_IDS?: string   // Comma-separated user snowflakes. Empty = application owner only
+ANTHROPIC_API_KEY?: string        // Required to enable the AI agent
+AGENT_MODEL?: string              // Default claude-sonnet-5-5
 LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 ```
 
@@ -157,10 +170,11 @@ export const event: Event<Events.EventName> = {
 ```
 
 ### Existing Events
-- `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `ViewAuditLog`, `SendMessages`, `EmbedLinks`), logged in dev only. Prefetches managed staff role IDs.
+- `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `ManageChannels`, `ViewAuditLog`, `SendMessages`, `EmbedLinks`, `ReadMessageHistory`, `AddReactions`), logged in dev only. Prefetches managed staff role IDs and the Discord application owner for the AI allowlist.
 - `guild-member-add.ts`: If the joining member's Discord ID is linked on mge.tf, grant MGER, remove Unverified, and DM them.
 - `guild-member-update.ts`: On role changes, load desired hub roles from mge.tf and add/remove until Discord matches. Nickname-only updates are skipped when `oldMember` is cached. Uncached members still reconcile (partials). After membership screening (`pending` → not pending), runs the same auto-verify as join. If `DISCORD_GUILD_ID` is set, only that guild is watched.
 - `interaction-create.ts`: Handles slash command interactions
+- `message-create.ts`: AI ops chat. Allowlisted users who @mention the bot or reply to it get a public reply in the same channel. Follow-up replies continue the same in-memory session.
 
 ---
 
@@ -180,6 +194,10 @@ export const event: Event<Events.EventName> = {
 - `getCommands()`: Loads `.ts` files from `src/commands/`
 - `getEvents()`: Loads `.ts` files from `src/events/`
 - Also includes `index.ts` in subdirectories
+- Skips `*.test.ts` / `*.spec.ts`
+
+### `src/agent/`
+**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop. Sessions are in-memory (`channelId:userId`, 30 minute TTL). Tools live in `discord-tools.ts` and can only edit a fixed set of channel permission flags.
 
 ### `logger.ts`
 **Pino logger configuration**.
@@ -233,6 +251,7 @@ import { mgeApi } from '@/utils/api';
 | `bun run deploy-commands --global` | Global deploy |
 | `bun run check` | Biome lint + format |
 | `bun run typecheck` | TypeScript check |
+| `bun run test` | Unit tests |
 
 ### Pre-commit Hook
 `lefthook` runs `bun run check` automatically before commit.
@@ -243,7 +262,7 @@ import { mgeApi } from '@/utils/api';
 
 ### Railway
 - `railway.json` pre-configured
-- Set all env vars in the Railway dashboard: `DISCORD_BOT_TOKEN`, `DISCORD_APPLICATION_ID`, `MGE_API_URL`, `MGE_API_KEY`, `VERIFIED_ROLE_ID`
+- Set all env vars in the Railway dashboard: `DISCORD_BOT_TOKEN`, `DISCORD_APPLICATION_ID`, `MGE_API_URL`, `MGE_API_KEY`, `VERIFIED_ROLE_ID`, `ANTHROPIC_API_KEY`
 
 ### Docker
 ```bash

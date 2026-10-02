@@ -14,6 +14,9 @@ jobs:
       DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN || 'DUMMY' }}
       DISCORD_APPLICATION_ID: ${{ secrets.DISCORD_APPLICATION_ID || 'DUMMY' }}
       DISCORD_GUILD_ID: ${{ secrets.DISCORD_GUILD_ID || 'DUMMY' }}
+      MGE_API_URL: http://127.0.0.1
+      MGE_API_KEY: dummy
+      VERIFY_ADD_ROLE_IDS: '1'
 
     steps:
       - name: Checkout
@@ -30,6 +33,9 @@ jobs:
 
       - name: TypeScript typecheck
         run: bun run typecheck
+
+      - name: Tests
+        run: bun test
 
       # Deploy commands globally (optional, need APPLICATION_ID)
       # - name: Deploy commands

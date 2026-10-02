@@ -38,6 +38,21 @@ export const env = createEnv({
     WHOIS_DB_ASIA: z.string().optional(),
     // Optional: restrict /altcheck to a specific channel
     ALTCHECK_CHANNEL_ID: z.string().optional(),
+    AGENT_ALLOWED_USER_IDS: z
+      .string()
+      .optional()
+      .default('')
+      .transform((val) =>
+        val
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean)
+      ),
+    ANTHROPIC_API_KEY: z
+      .string()
+      .optional()
+      .transform((val) => (val && val.length > 0 ? val : undefined)),
+    AGENT_MODEL: z.string().optional().default('claude-sonnet-5-5'),
     LOG_LEVEL: z
       .enum(['debug', 'info', 'warn', 'error'])
       .optional()

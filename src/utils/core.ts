@@ -10,7 +10,12 @@ const collectModuleFiles = (baseDir: string): string[] => {
   const files: string[] = [];
 
   for (const entry of fs.readdirSync(baseDir, { withFileTypes: true })) {
-    if (entry.isFile() && entry.name.endsWith('.ts')) {
+    if (
+      entry.isFile() &&
+      entry.name.endsWith('.ts') &&
+      !entry.name.endsWith('.test.ts') &&
+      !entry.name.endsWith('.spec.ts')
+    ) {
       files.push(path.join(baseDir, entry.name));
     } else if (entry.isDirectory()) {
       const indexFile = path.join(baseDir, entry.name, 'index.ts');

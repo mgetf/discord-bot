@@ -11,6 +11,7 @@ The official Discord bot for the [mge.tf](https://mge.tf) community.
 - **Account Verification** — Users link Discord on mge.tf and receive **MGER** automatically. Unlinking restores **Unverified**. `/verify` is a fallback if roles were missed.
 - **Alt Account Detection** — `/altcheck` cross-references shared-IP whois databases across regions to flag likely alt accounts of a given Steam ID, for use by server admins/moderators.
 - **Staff role protection** — Discord roles mapped in the mge.tf staff hub cannot be granted by hand. If someone adds one, the bot removes it and DMs them to assign it at `/admin/staff`.
+- **AI ops chat** — Allowlisted users (by default, the Discord application owner) can @mention the bot or reply to it. It inspects and fixes channel permission overwrites, and keeps a 30-minute conversation session per channel.
 
 ## Setup
 
@@ -60,14 +61,20 @@ WHOIS_DB_ASIA=
 
 # Optional: restrict /altcheck to a specific channel
 ALTCHECK_CHANNEL_ID=
+
+# Leave empty to allow only the Discord application owner
+AGENT_ALLOWED_USER_IDS=
+
+# Anthropic API key. Required for the AI agent.
+ANTHROPIC_API_KEY=
 ```
 
 ### 3. Create a Discord Application
 
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
 2. Create a new application and add a Bot user
-3. Under **Privileged Gateway Intents**, enable **Server Members Intent** (required for role assignment and staff role protection)
-4. Invite the bot with **Manage Roles**, **View Audit Log**, **Send Messages**, and **Embed Links** (the ready-handler invite link includes these)
+3. Under **Privileged Gateway Intents**, enable **Server Members Intent** (role assignment and staff role protection) and **Message Content Intent** (AI ops chat)
+4. Invite the bot with **Manage Roles**, **Manage Channels**, **View Audit Log**, **Send Messages**, **Embed Links**, **Read Message History**, and **Add Reactions** (the ready-handler invite link includes these)
 5. Copy the bot token to `DISCORD_BOT_TOKEN`
 
 ### 4. Generate an API Key
@@ -103,6 +110,15 @@ bun run start
 
 `/altcheck` requires at least one of `WHOIS_DB_NA`, `WHOIS_DB_EU`, or `WHOIS_DB_ASIA` to be configured, and can optionally be restricted to a single channel via `ALTCHECK_CHANNEL_ID`. It has no additional role gating — anyone who can use slash commands in the allowed channel can run it.
 
+## AI ops chat
+
+Set `ANTHROPIC_API_KEY`. Leave `AGENT_ALLOWED_USER_IDS` empty to allow only the Discord application owner, or put a comma-separated list of user snowflakes.
+
+- @mention the bot to start a conversation in that channel
+- Reply to the bot (no mention needed) to continue the same session
+- Sessions expire after 30 minutes of inactivity and live in memory (a restart starts clean)
+- The bot can inspect channels/roles and edit permission overwrites. It cannot grant Administrator.
+
 ## Project Structure
 
 ```
@@ -119,7 +135,13 @@ src/
 │   ├── ready.ts      # Bot ready handler
 │   ├── guild-member-add.ts     # Auto-verify linked members on join
 │   ├── guild-member-update.ts  # Reverts hand-assigned staff hub roles
-│   └── interaction-create.ts  # Command router
+│   ├── interaction-create.ts  # Command router
+│   └── message-create.ts      # AI ops chat (@mention / reply)
+├── agent/
+│   ├── allowlist.ts   # Who may talk to the AI agent
+│   ├── sessions.ts    # In-memory conversation sessions
+│   ├── discord-tools.ts  # Channel inspect / overwrite tools
+│   └── run.ts         # Anthropic tool loop
 └── utils/
     ├── api.ts        # mge.tf API client
     ├── managed-staff-roles.ts  # Managed staff role cache + diff helper
@@ -162,3 +184,4 @@ docker run -d --env-file .env mgetf-discord-bot
 | `bun run fmt` | Format code with Biome |
 | `bun run check` | Lint + format |
 | `bun run typecheck` | TypeScript type check |
+| `bun run test` | Unit tests |

@@ -3,6 +3,12 @@ import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/messages'
 import type { Guild, Message } from 'discord.js';
 import { buildAgentUserTurn } from '@/agent/context';
 import { AGENT_TOOLS, executeAgentTool } from '@/agent/discord-tools';
+import {
+  type AttachmentLike,
+  dropOldImageBlocks,
+  loadAgentImages,
+  toUserMessageContent
+} from '@/agent/images';
 import { type AgentSession, pruneAgentMessages } from '@/agent/sessions';
 import { getAgentModel, getSystemPrompt } from '@/agent/settings';
 import { env } from '@/env';
@@ -15,18 +21,23 @@ export async function runAgentTurn(input: {
   session: AgentSession;
   message: Message<true>;
   guild: Guild;
-  repliedMessageContent?: string | null;
+  referenced?: Message | null;
 }): Promise<string> {
   const apiKey = env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not configured');
 
   const client = new Anthropic({ apiKey });
-  const userText = buildUserTurn(
+  const { content, imageCount, skippedCount } = await buildUserContent(
     input.message,
-    input.repliedMessageContent ?? null
+    input.referenced ?? null
   );
-  input.session.messages.push({ role: 'user', content: userText });
-  input.session.messages = pruneAgentMessages(input.session.messages);
+  if (imageCount > 0 || skippedCount > 0) {
+    log.info({ imageCount, skippedCount }, 'Agent turn includes attachments');
+  }
+  input.session.messages.push({ role: 'user', content });
+  input.session.messages = dropOldImageBlocks(
+    pruneAgentMessages(input.session.messages)
+  );
 
   for (let step = 0; step < MAX_STEPS; step++) {
     const response = await client.messages.create({
@@ -73,21 +84,55 @@ export async function runAgentTurn(input: {
   return 'I ran out of steps this turn. Ask me again for what is left.';
 }
 
-function buildUserTurn(
+async function buildUserContent(
   message: Message<true>,
-  repliedMessageContent: string | null
-): string {
+  referenced: Message | null
+): Promise<{
+  content: ReturnType<typeof toUserMessageContent>;
+  imageCount: number;
+  skippedCount: number;
+}> {
+  const { images, skipped } = await loadAgentImages(
+    [...attachmentsFrom(message), ...attachmentsFrom(referenced)],
+    { authToken: env.DISCORD_BOT_TOKEN }
+  );
   const mentioned = [...message.mentions.channels.values()].map(
     (channel) =>
       `#${'name' in channel ? channel.name : channel.id} (${channel.id})`
   );
-  return buildAgentUserTurn({
+  let userText = stripBotMention(message);
+  if (userText.length === 0 && images.length > 0) {
+    userText = '(see attached image)';
+  }
+  const text = buildAgentUserTurn({
     guildLabel: `${message.guild.name} (${message.guild.id})`,
     channelLabel: `#${'name' in message.channel ? message.channel.name : message.channelId} (${message.channelId}) type=${message.channel.type}`,
     mentionedChannels: mentioned,
-    repliedMessageContent,
-    userText: stripBotMention(message)
+    repliedMessageContent: referenced ? referenced.content : null,
+    attachedImages: images.map(
+      (image) => `${image.filename} (${image.mediaType})`
+    ),
+    skippedAttachments: skipped.map(
+      (item) => `${item.filename} (${item.reason})`
+    ),
+    userText
   });
+  return {
+    content: toUserMessageContent(text, images),
+    imageCount: images.length,
+    skippedCount: skipped.length
+  };
+}
+
+function attachmentsFrom(message: Message | null): AttachmentLike[] {
+  if (!message) return [];
+  return [...message.attachments.values()].map((item) => ({
+    id: item.id,
+    name: item.name,
+    size: item.size,
+    url: item.url,
+    contentType: item.contentType
+  }));
 }
 
 function stripBotMention(message: Message<true>): string {

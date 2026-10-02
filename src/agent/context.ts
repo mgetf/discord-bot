@@ -3,6 +3,8 @@ export function buildAgentUserTurn(input: {
   channelLabel: string;
   mentionedChannels: string[];
   repliedMessageContent: string | null;
+  attachedImages?: string[];
+  skippedAttachments?: string[];
   userText: string;
 }): string {
   const lines = [
@@ -15,6 +17,12 @@ export function buildAgentUserTurn(input: {
   ];
   if (input.repliedMessageContent !== null) {
     lines.push(`replied_message_content: ${input.repliedMessageContent}`);
+  }
+  if (input.attachedImages && input.attachedImages.length > 0) {
+    lines.push(`attached_images: ${input.attachedImages.join(', ')}`);
+  }
+  if (input.skippedAttachments && input.skippedAttachments.length > 0) {
+    lines.push(`skipped_attachments: ${input.skippedAttachments.join(', ')}`);
   }
   lines.push('[/context]', '', input.userText);
   return lines.join('\n');

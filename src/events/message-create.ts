@@ -60,7 +60,7 @@ export const event: Event<Events.MessageCreate> = {
         session,
         message,
         guild,
-        repliedMessageContent: referenced ? referenced.content : null
+        referenced
       });
       const chunks = splitDiscordContent(answer).map(neutralizeDiscordMentions);
       const first = chunks[0] ?? '(no text)';

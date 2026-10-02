@@ -26,4 +26,14 @@ describe('buildAgentUserTurn', () => {
       'replied_message_content: anyone can talk in #announcements'
     );
   });
+
+  test('lists attached images and skipped files', () => {
+    const text = buildAgentUserTurn({
+      ...base,
+      attachedImages: ['shot.png (image/png)'],
+      skippedAttachments: ['clip.mp4 (unsupported type)']
+    });
+    expect(text).toContain('attached_images: shot.png (image/png)');
+    expect(text).toContain('skipped_attachments: clip.mp4 (unsupported type)');
+  });
 });

@@ -49,6 +49,7 @@ src/
 │   ├── context.ts        # User-turn context block (guild/channel/reply)
 │   ├── mentions.ts       # Strip pings from public replies
 │   ├── settings.ts       # Runtime model + system prompt (slash-configurable)
+│   ├── images.ts         # Download Discord attachments for vision
 │   └── run.ts            # Anthropic tool loop
 └── utils/
     ├── api.ts        # mge.tf external API client
@@ -210,7 +211,7 @@ export const event: Event<Events.EventName> = {
 - Skips `*.test.ts` / `*.spec.ts`
 
 ### `src/agent/`
-**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop. `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). `settings.ts` holds the live model + system prompt (`/agent`); persisted to `data/agent-settings.json`. `mentions.ts` breaks `@everyone` / role / user pings in public replies. Sessions are in-memory (`channelId:userId`, 30 minute TTL). Tools live in `discord-tools.ts` and can only edit a fixed set of channel permission flags.
+**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop. `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). `images.ts` downloads jpeg/png/gif/webp attachments (current message + replied message, max 4, 5 MB each) and sends them as vision blocks. `settings.ts` holds the live model + system prompt (`/agent`); persisted to `data/agent-settings.json`. `mentions.ts` breaks `@everyone` / role / user pings in public replies. Sessions are in-memory (`channelId:userId`, 30 minute TTL). Tools live in `discord-tools.ts` and can only edit a fixed set of channel permission flags.
 
 ### `logger.ts`
 **Pino logger configuration**.

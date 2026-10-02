@@ -125,6 +125,7 @@ Set `ANTHROPIC_API_KEY`. Leave `AGENT_ALLOWED_USER_IDS` empty to allow only the 
 - Sessions expire after 30 minutes of inactivity and live in memory (a restart starts clean)
 - The bot can inspect channels/roles and edit permission overwrites. It cannot grant Administrator.
 - Public replies never ping `@everyone`, `@here`, roles, or users. `/agent` can change the model and system prompt without a redeploy.
+- Attach a jpeg/png/gif/webp (or reply to a message that has one) and the model can see it. Max 4 images per turn, 5 MB each.
 
 ## Project Structure
 
@@ -151,6 +152,7 @@ src/
 │   ├── discord-tools.ts  # Channel inspect / overwrite tools
 │   ├── mentions.ts    # Strip pings from public replies
 │   ├── settings.ts    # Runtime model + system prompt
+│   ├── images.ts      # Discord attachments → vision
 │   └── run.ts         # Anthropic tool loop
 └── utils/
     ├── api.ts        # mge.tf API client

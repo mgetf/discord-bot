@@ -9,7 +9,7 @@ describe('agent settings', () => {
 
   test('default prompt forbids pings without permission', () => {
     const lower = DEFAULT_SYSTEM_PROMPT.toLowerCase();
-    expect(lower).toContain('mentions are forbidden');
+    expect(lower).toContain('do not ping anyone');
     expect(lower).toContain('@everyone');
     expect(lower).toContain('@here');
     expect(lower).toContain('<@&');

@@ -28,3 +28,6 @@ Thumbs.db
 
 # Bun
 bun.lockb
+
+# Runtime agent config (model / system prompt overrides)
+data/

@@ -107,8 +107,14 @@ bun run start
 | `/verify` | Verify your mge.tf account and receive server roles |
 | `/verify profile:<url>` | Same as above, but cross-checks the provided mge.tf profile URL |
 | `/altcheck steam_id:<id>` | Cross-reference whois databases for potential alt accounts of a Steam ID |
+| `/agent model` | Dropdown: Haiku 4.5 / Sonnet 5.5 / Opus 5.5 |
+| `/agent prompt` | Modal to edit the system prompt |
+| `/agent show` | Show the current model and prompt |
+| `/agent reset` | Restore default model and prompt |
 
 `/altcheck` requires at least one of `WHOIS_DB_NA`, `WHOIS_DB_EU`, or `WHOIS_DB_ASIA` to be configured, and can optionally be restricted to a single channel via `ALTCHECK_CHANNEL_ID`. It has no additional role gating — anyone who can use slash commands in the allowed channel can run it.
+
+`/agent` is gated to the same allowlist as the AI chat (application owner if `AGENT_ALLOWED_USER_IDS` is empty).
 
 ## AI ops chat
 
@@ -118,6 +124,7 @@ Set `ANTHROPIC_API_KEY`. Leave `AGENT_ALLOWED_USER_IDS` empty to allow only the 
 - Reply to the bot (no mention needed) to continue the same session
 - Sessions expire after 30 minutes of inactivity and live in memory (a restart starts clean)
 - The bot can inspect channels/roles and edit permission overwrites. It cannot grant Administrator.
+- Public replies never ping `@everyone`, `@here`, roles, or users. `/agent` can change the model and system prompt without a redeploy.
 
 ## Project Structure
 
@@ -130,7 +137,8 @@ src/
 ├── deploy.ts         # Slash command deployment script
 ├── commands/
 │   ├── verify.ts     # /verify command
-│   └── altcheck.ts   # /altcheck command
+│   ├── altcheck.ts   # /altcheck command
+│   └── agent.ts      # /agent model|prompt|show|reset
 ├── events/
 │   ├── ready.ts      # Bot ready handler
 │   ├── guild-member-add.ts     # Auto-verify linked members on join
@@ -141,6 +149,8 @@ src/
 │   ├── allowlist.ts   # Who may talk to the AI agent
 │   ├── sessions.ts    # In-memory conversation sessions
 │   ├── discord-tools.ts  # Channel inspect / overwrite tools
+│   ├── mentions.ts    # Strip pings from public replies
+│   ├── settings.ts    # Runtime model + system prompt
 │   └── run.ts         # Anthropic tool loop
 └── utils/
     ├── api.ts        # mge.tf API client

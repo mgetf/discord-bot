@@ -1,5 +1,6 @@
 import { Events, OAuth2Scopes, PermissionFlagsBits } from 'discord.js';
 import { cacheApplicationOwnerId } from '@/agent/allowlist';
+import { getAgentModel } from '@/agent/settings';
 import { env } from '@/env';
 import type { Event } from '@/types';
 import { logger } from '@/utils/logger';
@@ -37,7 +38,7 @@ export const event: Event<Events.ClientReady> = {
       log.info(
         {
           allowlist: env.AGENT_ALLOWED_USER_IDS.length,
-          model: env.AGENT_MODEL
+          model: getAgentModel()
         },
         env.AGENT_ALLOWED_USER_IDS.length > 0
           ? 'AI agent enabled for allowlisted users'

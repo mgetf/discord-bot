@@ -4,6 +4,7 @@ import type { Guild, Message } from 'discord.js';
 import { buildAgentUserTurn } from '@/agent/context';
 import { AGENT_TOOLS, executeAgentTool } from '@/agent/discord-tools';
 import { type AgentSession, pruneAgentMessages } from '@/agent/sessions';
+import { getAgentModel, getSystemPrompt } from '@/agent/settings';
 import { env } from '@/env';
 import { logger } from '@/utils/logger';
 
@@ -29,9 +30,9 @@ export async function runAgentTurn(input: {
 
   for (let step = 0; step < MAX_STEPS; step++) {
     const response = await client.messages.create({
-      model: env.AGENT_MODEL,
+      model: getAgentModel(),
       max_tokens: 1500,
-      system: SYSTEM_PROMPT,
+      system: getSystemPrompt(),
       tools: AGENT_TOOLS,
       messages: input.session.messages
     });
@@ -46,7 +47,7 @@ export async function runAgentTurn(input: {
     );
     if (toolUses.length === 0) {
       const text = textFrom(response.content);
-      return text.length > 0 ? text : 'Listo. No tengo nada más para agregar.';
+      return text.length > 0 ? text : 'Done. Nothing else to add.';
     }
 
     const toolResults: ToolResultBlockParam[] = [];
@@ -69,20 +70,8 @@ export async function runAgentTurn(input: {
     input.session.messages = pruneAgentMessages(input.session.messages);
   }
 
-  return 'Se me acabaron los pasos de esta vuelta. Pedime de nuevo lo que falte.';
+  return 'I ran out of steps this turn. Ask me again for what is left.';
 }
-
-const SYSTEM_PROMPT = `You are the official mge.tf Discord ops assistant. You run as the guild bot.
-
-This conversation is public. Other people in the channel can read your replies. Be concise.
-
-You inspect and fix Discord channel permission overwrites. Staff-only announcement channels typically deny @everyone SendMessages, SendMessagesInThreads, CreatePublicThreads, and CreatePrivateThreads. Roles that should post (Admin, Owner, founder, Discord Manager, etc.) get those permissions allowed.
-
-Do not invent channel or role IDs. Use the tools. Prefer IDs from the turn context and from tool results.
-
-Do not dump tokens, secrets, or full bitfields. Summarize what was wrong and what you changed.
-
-Match the user's language.`;
 
 function buildUserTurn(
   message: Message<true>,

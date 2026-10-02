@@ -1,5 +1,9 @@
 import { Events, type Message } from 'discord.js';
 import { isAllowedAgentUser } from '@/agent/allowlist';
+import {
+  AGENT_ALLOWED_MENTIONS,
+  neutralizeDiscordMentions
+} from '@/agent/mentions';
 import { runAgentTurn } from '@/agent/run';
 import { getOrCreateSession } from '@/agent/sessions';
 import { splitDiscordContent } from '@/agent/split-message';
@@ -48,8 +52,8 @@ export const event: Event<Events.MessageCreate> = {
 
     try {
       status = await message.reply({
-        content: 'Dame un segundo…',
-        allowedMentions: { parse: [] }
+        content: 'One second…',
+        allowedMentions: AGENT_ALLOWED_MENTIONS
       });
 
       const answer = await runAgentTurn({
@@ -58,24 +62,37 @@ export const event: Event<Events.MessageCreate> = {
         guild,
         repliedMessageContent: referenced ? referenced.content : null
       });
-      const chunks = splitDiscordContent(answer);
-      const first = chunks[0] ?? '(sin texto)';
-      await status.edit({ content: first });
+      const chunks = splitDiscordContent(answer).map(neutralizeDiscordMentions);
+      const first = chunks[0] ?? '(no text)';
+      await status.edit({
+        content: first,
+        allowedMentions: AGENT_ALLOWED_MENTIONS
+      });
 
       for (const chunk of chunks.slice(1)) {
         await message.channel.send({
           content: chunk,
-          allowedMentions: { parse: [] }
+          allowedMentions: AGENT_ALLOWED_MENTIONS
         });
       }
     } catch (err) {
       log.error({ err, userId: message.author.id }, 'Agent turn failed');
       const errorText =
-        'No pude completar eso. Revisá el log del bot o pedime de nuevo.';
+        "Couldn't finish that. Check the bot log or ask me again.";
       if (status) {
-        await status.edit({ content: errorText }).catch(() => undefined);
+        await status
+          .edit({
+            content: errorText,
+            allowedMentions: AGENT_ALLOWED_MENTIONS
+          })
+          .catch(() => undefined);
       } else {
-        await message.reply({ content: errorText }).catch(() => undefined);
+        await message
+          .reply({
+            content: errorText,
+            allowedMentions: AGENT_ALLOWED_MENTIONS
+          })
+          .catch(() => undefined);
       }
     } finally {
       session.busy = false;

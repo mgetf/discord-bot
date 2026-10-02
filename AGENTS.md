@@ -31,7 +31,8 @@ src/
 ├── deploy.ts         # Command deployment script
 ├── commands/
 │   ├── verify.ts     # /verify slash command
-│   └── altcheck.ts   # /altcheck slash command
+│   ├── altcheck.ts   # /altcheck slash command
+│   └── agent.ts      # /agent model|prompt|show|reset
 ├── events/
 │   ├── ready.ts      # Bot ready handler
 │   ├── guild-member-add.ts     # Auto-verify members whose Discord is linked on mge.tf
@@ -46,6 +47,8 @@ src/
 │   ├── discord-tools.ts  # Channel inspect / overwrite tools
 │   ├── split-message.ts  # Discord 2000-char chunking
 │   ├── context.ts        # User-turn context block (guild/channel/reply)
+│   ├── mentions.ts       # Strip pings from public replies
+│   ├── settings.ts       # Runtime model + system prompt (slash-configurable)
 │   └── run.ts            # Anthropic tool loop
 └── utils/
     ├── api.ts        # mge.tf external API client
@@ -94,7 +97,7 @@ WHOIS_DB_ASIA?: string            // host:port:password — Asia whois DB for /a
 ALTCHECK_CHANNEL_ID?: string      // Restrict /altcheck to one channel
 AGENT_ALLOWED_USER_IDS?: string   // Comma-separated user snowflakes. Empty = application owner only
 ANTHROPIC_API_KEY?: string        // Required to enable the AI agent
-AGENT_MODEL?: string              // Default claude-sonnet-5-5
+AGENT_MODEL?: string              // Default claude-sonnet-5-5; /agent model overrides at runtime
 LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 ```
 
@@ -119,6 +122,15 @@ LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 3. Builds the list of configured regions from `WHOIS_DB_NA/EU/ASIA` and runs `runAltCheck()` from `src/utils/whois.ts` against each
 4. Renders a summary embed with per-region entry counts, IP overlap, and scored alt candidates (weighted by IP exclusivity, temporal proximity, and co-presence)
 5. No permission gating beyond the optional channel restriction — anyone able to use slash commands in that channel can run it
+
+### `src/commands/agent.ts`
+**`/agent` command**. Allowlisted operators only (same list as the AI chat). Subcommands:
+- `model` — dropdown of Haiku / Sonnet / Opus 4.5 and 5.5
+- `prompt` — opens a modal (4000 chars) to replace the system prompt
+- `show` — ephemeral dump of the live model + prompt
+- `reset` — wipe file overrides (model falls back to `AGENT_MODEL`)
+
+Persisted to `data/agent-settings.json`. Redeploy wipes that file unless a volume is mounted.
 
 ---
 
@@ -174,7 +186,7 @@ export const event: Event<Events.EventName> = {
 - `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `ManageChannels`, `ViewAuditLog`, `SendMessages`, `EmbedLinks`, `ReadMessageHistory`, `AddReactions`), logged in dev only. Prefetches managed staff role IDs and the Discord application owner for the AI allowlist.
 - `guild-member-add.ts`: If the joining member's Discord ID is linked on mge.tf, grant MGER, remove Unverified, and DM them.
 - `guild-member-update.ts`: On role changes, load desired hub roles from mge.tf and add/remove until Discord matches. Nickname-only updates are skipped when `oldMember` is cached. Uncached members still reconcile (partials). After membership screening (`pending` → not pending), runs the same auto-verify as join. If `DISCORD_GUILD_ID` is set, only that guild is watched.
-- `interaction-create.ts`: Handles slash command interactions
+- `interaction-create.ts`: Handles slash commands and the `/agent prompt` modal
 - `message-create.ts`: AI ops chat. Allowlisted users who @mention the bot or reply to it get a public reply in the same channel. Follow-up replies continue the same in-memory session.
 
 ---
@@ -198,7 +210,7 @@ export const event: Event<Events.EventName> = {
 - Skips `*.test.ts` / `*.spec.ts`
 
 ### `src/agent/`
-**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop. `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). Sessions are in-memory (`channelId:userId`, 30 minute TTL). Tools live in `discord-tools.ts` and can only edit a fixed set of channel permission flags.
+**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop. `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). `settings.ts` holds the live model + system prompt (`/agent`); persisted to `data/agent-settings.json`. `mentions.ts` breaks `@everyone` / role / user pings in public replies. Sessions are in-memory (`channelId:userId`, 30 minute TTL). Tools live in `discord-tools.ts` and can only edit a fixed set of channel permission flags.
 
 ### `logger.ts`
 **Pino logger configuration**.

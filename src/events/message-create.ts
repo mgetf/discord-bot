@@ -17,7 +17,8 @@ export const event: Event<Events.MessageCreate> = {
     const botId = message.client.user?.id;
     if (!botId) return;
 
-    const replyToBot = await isReplyToUser(message, botId);
+    const referenced = await fetchReferencedMessage(message);
+    const replyToBot = referenced?.author.id === botId;
     if (
       !shouldHandleAgentMessage({
         authorBot: message.author.bot,
@@ -51,7 +52,12 @@ export const event: Event<Events.MessageCreate> = {
         allowedMentions: { parse: [] }
       });
 
-      const answer = await runAgentTurn({ session, message, guild });
+      const answer = await runAgentTurn({
+        session,
+        message,
+        guild,
+        repliedMessageContent: referenced ? referenced.content : null
+      });
       const chunks = splitDiscordContent(answer);
       const first = chunks[0] ?? '(sin texto)';
       await status.edit({ content: first });
@@ -79,16 +85,14 @@ export const event: Event<Events.MessageCreate> = {
   }
 };
 
-async function isReplyToUser(
-  message: Message<true>,
-  userId: string
-): Promise<boolean> {
-  if (!message.reference?.messageId) return false;
+async function fetchReferencedMessage(
+  message: Message<true>
+): Promise<Message | null> {
+  if (!message.reference?.messageId) return null;
   try {
-    const referenced = await message.fetchReference();
-    return referenced.author.id === userId;
+    return await message.fetchReference();
   } catch {
-    return false;
+    return null;
   }
 }
 

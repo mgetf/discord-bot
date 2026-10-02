@@ -45,6 +45,7 @@ src/
 │   ├── permissions.ts    # Allowlisted overwrite flags
 │   ├── discord-tools.ts  # Channel inspect / overwrite tools
 │   ├── split-message.ts  # Discord 2000-char chunking
+│   ├── context.ts        # User-turn context block (guild/channel/reply)
 │   └── run.ts            # Anthropic tool loop
 └── utils/
     ├── api.ts        # mge.tf external API client
@@ -197,7 +198,7 @@ export const event: Event<Events.EventName> = {
 - Skips `*.test.ts` / `*.spec.ts`
 
 ### `src/agent/`
-**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop. Sessions are in-memory (`channelId:userId`, 30 minute TTL). Tools live in `discord-tools.ts` and can only edit a fixed set of channel permission flags.
+**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop. `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). Sessions are in-memory (`channelId:userId`, 30 minute TTL). Tools live in `discord-tools.ts` and can only edit a fixed set of channel permission flags.
 
 ### `logger.ts`
 **Pino logger configuration**.

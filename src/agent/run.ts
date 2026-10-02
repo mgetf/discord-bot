@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/messages';
 import type { Guild, Message } from 'discord.js';
+import { buildAgentUserTurn } from '@/agent/context';
 import { AGENT_TOOLS, executeAgentTool } from '@/agent/discord-tools';
 import { type AgentSession, pruneAgentMessages } from '@/agent/sessions';
 import { env } from '@/env';
@@ -13,12 +14,16 @@ export async function runAgentTurn(input: {
   session: AgentSession;
   message: Message<true>;
   guild: Guild;
+  repliedMessageContent?: string | null;
 }): Promise<string> {
   const apiKey = env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY is not configured');
 
   const client = new Anthropic({ apiKey });
-  const userText = buildUserTurn(input.message);
+  const userText = buildUserTurn(
+    input.message,
+    input.repliedMessageContent ?? null
+  );
   input.session.messages.push({ role: 'user', content: userText });
   input.session.messages = pruneAgentMessages(input.session.messages);
 
@@ -79,23 +84,21 @@ Do not dump tokens, secrets, or full bitfields. Summarize what was wrong and wha
 
 Match the user's language.`;
 
-function buildUserTurn(message: Message<true>): string {
+function buildUserTurn(
+  message: Message<true>,
+  repliedMessageContent: string | null
+): string {
   const mentioned = [...message.mentions.channels.values()].map(
     (channel) =>
       `#${'name' in channel ? channel.name : channel.id} (${channel.id})`
   );
-  const lines = [
-    '[context]',
-    `guild: ${message.guild.name} (${message.guild.id})`,
-    `channel: #${'name' in message.channel ? message.channel.name : message.channelId} (${message.channelId}) type=${message.channel.type}`,
-    mentioned.length > 0
-      ? `mentioned_channels: ${mentioned.join(', ')}`
-      : 'mentioned_channels: none',
-    '[/context]',
-    '',
-    stripBotMention(message)
-  ];
-  return lines.join('\n');
+  return buildAgentUserTurn({
+    guildLabel: `${message.guild.name} (${message.guild.id})`,
+    channelLabel: `#${'name' in message.channel ? message.channel.name : message.channelId} (${message.channelId}) type=${message.channel.type}`,
+    mentionedChannels: mentioned,
+    repliedMessageContent,
+    userText: stripBotMention(message)
+  });
 }
 
 function stripBotMention(message: Message<true>): string {

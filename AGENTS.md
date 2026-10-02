@@ -291,3 +291,12 @@ Multi-stage build, non-root user.
 1. Add Zod schema to `src/env.ts`
 2. Add to `.env.example`
 3. Update this file under `src/env.ts` section
+
+---
+
+## Cursor Cloud specific instructions
+
+- Bun **1.4.2** (the `Dockerfile` image) is on `PATH` as `/usr/local/bin/bun`. Refresh dependencies with `bun install --frozen-lockfile`.
+- `bun test` and `bun run start` import `src/env.ts`, which rejects the process unless `DISCORD_BOT_TOKEN`, `DISCORD_APPLICATION_ID`, `MGE_API_URL` (a URL), `MGE_API_KEY`, and `VERIFY_ADD_ROLE_IDS` are set. CI uses non-secret placeholders in `.github/workflows/ci.yml`. `bun run check` and `bun run typecheck` do not need them.
+- `bun run check` currently exits 0 with existing Biome warnings (deprecated `recommended` preset, optional-chain suggestions).
+- Develop with `bun run check`, `bun run typecheck`, and `bun test`. Reserve `bun run start` for a development Discord application. Logging in with the production bot token joins the live gateway and conflicts with the deployed bot.

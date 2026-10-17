@@ -11,10 +11,15 @@ import {
 import { isAllowedAgentUser } from '@/agent/allowlist';
 import { AGENT_ALLOWED_MENTIONS } from '@/agent/mentions';
 import {
-  AGENT_MODELS,
+  filterAgentModels,
+  labelForAgentModel,
+  listAgentModels,
+  resolveAgentModel,
+  toAutocompleteChoice
+} from '@/agent/models';
+import {
   getAgentModel,
   getSystemPrompt,
-  isAgentModelId,
   resetAgentSettings,
   setAgentModel,
   setSystemPrompt
@@ -41,14 +46,9 @@ export const command: Command<ChatInputCommandInteraction> = {
         .addStringOption((option) =>
           option
             .setName('name')
-            .setDescription('Model to use for the next turns')
+            .setDescription('Anthropic model id (type to search)')
             .setRequired(true)
-            .addChoices(
-              ...AGENT_MODELS.map((model) => ({
-                name: model.name,
-                value: model.value
-              }))
-            )
+            .setAutocomplete(true)
         )
     )
     .addSubcommand((sub) =>
@@ -60,6 +60,26 @@ export const command: Command<ChatInputCommandInteraction> = {
     .addSubcommand((sub) =>
       sub.setName('reset').setDescription('Reset model and prompt to defaults')
     ),
+
+  autocomplete: async (interaction) => {
+    if (!isAllowedAgentUser(interaction.user.id)) {
+      await interaction.respond([]);
+      return;
+    }
+    if (interaction.options.getSubcommand() !== 'model') {
+      await interaction.respond([]);
+      return;
+    }
+    const focused = interaction.options.getFocused(true);
+    if (focused.name !== 'name') {
+      await interaction.respond([]);
+      return;
+    }
+    const models = await listAgentModels();
+    await interaction.respond(
+      filterAgentModels(models, focused.value).map(toAutocompleteChoice)
+    );
+  },
 
   execute: async (interaction) => {
     if (!isAllowedAgentUser(interaction.user.id)) {
@@ -78,17 +98,18 @@ export const command: Command<ChatInputCommandInteraction> = {
 
     if (sub === 'model') {
       const name = interaction.options.getString('name', true);
-      if (!isAgentModelId(name)) {
-        await interaction.reply({
-          content: 'Unknown model.',
-          ...ephemeral
+      await interaction.deferReply(ephemeral);
+      const model = await resolveAgentModel(name);
+      if (!model) {
+        await interaction.editReply({
+          content:
+            'Unknown Anthropic model. Pick one from the autocomplete list or type a valid Claude model id.'
         });
         return;
       }
-      setAgentModel(name);
-      await interaction.reply({
-        content: `Model set to **${labelFor(name)}** (\`${name}\`).`,
-        ...ephemeral
+      setAgentModel(model.id);
+      await interaction.editReply({
+        content: `Model set to **${model.name}** (\`${model.id}\`).`
       });
       return;
     }
@@ -96,7 +117,7 @@ export const command: Command<ChatInputCommandInteraction> = {
     if (sub === 'reset') {
       resetAgentSettings();
       await interaction.reply({
-        content: `Reset to defaults.\nModel: **${labelFor(getAgentModel())}** (\`${getAgentModel()}\`)`,
+        content: `Reset to defaults.\nModel: **${labelForAgentModel(getAgentModel())}** (\`${getAgentModel()}\`)`,
         ...ephemeral
       });
       return;
@@ -149,13 +170,9 @@ function promptModal(): ModalBuilder {
 function formatShow(): string {
   const model = getAgentModel();
   const prompt = getSystemPrompt();
-  const header = `Model: **${labelFor(model)}** (\`${model}\`)\nPrompt (${prompt.length} chars):`;
+  const header = `Model: **${labelForAgentModel(model)}** (\`${model}\`)\nPrompt (${prompt.length} chars):`;
   const budget = 1900 - header.length;
   const body =
     prompt.length > budget ? `${prompt.slice(0, budget - 1)}…` : prompt;
   return `${header}\n\`\`\`\n${body}\n\`\`\``;
-}
-
-function labelFor(model: string): string {
-  return AGENT_MODELS.find((entry) => entry.value === model)?.name ?? model;
 }

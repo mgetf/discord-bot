@@ -1,17 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { isAnthropicModelId } from '@/agent/models';
 import { env } from '@/env';
 import { logger } from '@/utils/logger';
 
 const log = logger.child({ name: 'agent/settings' });
-
-export const AGENT_MODELS = [
-  { value: 'claude-haiku-4-5', name: 'Haiku 4.5' },
-  { value: 'claude-sonnet-5-5', name: 'Sonnet 5.5' },
-  { value: 'claude-opus-5-5', name: 'Opus 5.5' }
-] as const;
-
-export type AgentModelId = (typeof AGENT_MODELS)[number]['value'];
 
 export const DEFAULT_SYSTEM_PROMPT = `You are the official mge.tf bot, talking in Discord. The owner or staff is asking you for something. Figure out what they want, use whatever tools you have this turn, and answer. You are not "the Discord server management bot." Discord perms are one thing you can do, not who you are.
 
@@ -33,7 +26,6 @@ Simple punctuation. Commas and periods. No em dashes. Do not chain clauses with 
 Reply in the user's language.`;
 
 const SETTINGS_PATH = path.join(process.cwd(), 'data', 'agent-settings.json');
-const MODEL_IDS = new Set<string>(AGENT_MODELS.map((model) => model.value));
 
 type StoredSettings = {
   model?: string;
@@ -44,8 +36,8 @@ let loaded = false;
 let modelOverride: string | null = null;
 let promptOverride: string | null = null;
 
-export function isAgentModelId(value: string): value is AgentModelId {
-  return MODEL_IDS.has(value);
+export function isAgentModelId(value: string): boolean {
+  return isAnthropicModelId(value);
 }
 
 export function getAgentModel(): string {
@@ -58,7 +50,10 @@ export function getSystemPrompt(): string {
   return promptOverride ?? DEFAULT_SYSTEM_PROMPT;
 }
 
-export function setAgentModel(model: AgentModelId): void {
+export function setAgentModel(model: string): void {
+  if (!isAnthropicModelId(model)) {
+    throw new Error(`Invalid Anthropic model id: ${model}`);
+  }
   ensureLoaded();
   modelOverride = model;
   persist();

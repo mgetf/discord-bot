@@ -15,10 +15,10 @@ describe('agent settings', () => {
     expect(lower).toContain('<@&');
   });
 
-  test('isAgentModelId accepts the dropdown values', () => {
+  test('isAgentModelId accepts Anthropic Claude ids', () => {
     expect(isAgentModelId('claude-haiku-4-5')).toBe(true);
     expect(isAgentModelId('claude-sonnet-5-5')).toBe(true);
-    expect(isAgentModelId('claude-opus-5-5')).toBe(true);
+    expect(isAgentModelId('claude-opus-4-6-20260301')).toBe(true);
     expect(isAgentModelId('gpt-4')).toBe(false);
   });
 });

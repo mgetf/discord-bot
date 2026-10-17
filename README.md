@@ -107,7 +107,7 @@ bun run start
 | `/verify` | Verify your mge.tf account and receive server roles |
 | `/verify profile:<url>` | Same as above, but cross-checks the provided mge.tf profile URL |
 | `/altcheck steam_id:<id>` | Cross-reference whois databases for potential alt accounts of a Steam ID |
-| `/agent model` | Dropdown: Haiku 4.5 / Sonnet 5.5 / Opus 5.5 |
+| `/agent model` | Autocomplete: every model from Anthropic's catalog |
 | `/agent prompt` | Modal to edit the system prompt |
 | `/agent show` | Show the current model and prompt |
 | `/agent reset` | Restore default model and prompt |

@@ -1,4 +1,5 @@
 import type {
+  AutocompleteInteraction,
   ClientEvents,
   Collection,
   Interaction,
@@ -19,6 +20,7 @@ declare module 'discord.js' {
 export interface Command<T extends Interaction> {
   data: Pick<SlashCommandBuilder, 'name' | 'toJSON'>;
   execute: (interaction: T) => Promise<void>;
+  autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>;
 }
 
 /**

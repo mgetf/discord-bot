@@ -49,6 +49,7 @@ src/
 │   ├── split-message.ts  # Discord 2000-char chunking
 │   ├── context.ts        # User-turn context block (guild/channel/reply)
 │   ├── mentions.ts       # Strip pings from public replies
+│   ├── models.ts         # Anthropic Models API catalog for /agent model
 │   ├── settings.ts       # Runtime model + system prompt (slash-configurable)
 │   ├── images.ts         # Download Discord attachments for vision
 │   └── run.ts            # Anthropic tool loop
@@ -99,7 +100,7 @@ WHOIS_DB_ASIA?: string            // host:port:password — Asia whois DB for /a
 ALTCHECK_CHANNEL_ID?: string      // Restrict /altcheck to one channel
 AGENT_ALLOWED_USER_IDS?: string   // Comma-separated user snowflakes. Empty = application owner only
 ANTHROPIC_API_KEY?: string        // Required to enable the AI agent
-AGENT_MODEL?: string              // Default claude-sonnet-5-5; /agent model overrides at runtime
+AGENT_MODEL?: string              // Default claude-sonnet-5-5; /agent model overrides from the live Anthropic catalog
 LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 ```
 
@@ -127,7 +128,7 @@ LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 
 ### `src/commands/agent.ts`
 **`/agent` command**. Allowlisted operators only (same list as the AI chat). Subcommands:
-- `model` — dropdown of Haiku / Sonnet / Opus 4.5 and 5.5
+- `model` — autocomplete of every model from Anthropic's Models API (type to search; Discord caps the visible list at 25)
 - `prompt` — opens a modal (4000 chars) to replace the system prompt
 - `show` — ephemeral dump of the live model + prompt
 - `reset` — wipe file overrides (model falls back to `AGENT_MODEL`)
@@ -188,7 +189,7 @@ export const event: Event<Events.EventName> = {
 - `ready.ts`: Bot ready. Generates an invite link with the permissions the bot needs for verification, staff roles, and the AI admin tools (manage channels/roles/messages, ban/kick/timeout, webhooks, emojis, events, voice move, nicknames, invites), logged in dev only. Prefetches managed staff role IDs and the Discord application owner for the AI allowlist. If the bot role is already Administrator, a re-invite is not required.
 - `guild-member-add.ts`: If the joining member's Discord ID is linked on mge.tf, grant MGER, remove Unverified, and DM them.
 - `guild-member-update.ts`: On role changes, load desired hub roles from mge.tf and add/remove until Discord matches. Nickname-only updates are skipped when `oldMember` is cached. Uncached members still reconcile (partials). After membership screening (`pending` → not pending), runs the same auto-verify as join. If `DISCORD_GUILD_ID` is set, only that guild is watched.
-- `interaction-create.ts`: Handles slash commands and the `/agent prompt` modal
+- `interaction-create.ts`: Handles slash commands, `/agent` autocomplete, and the `/agent prompt` modal
 - `message-create.ts`: AI ops chat. Allowlisted users who @mention the bot or reply to it get a public reply in the same channel. Follow-up replies continue the same in-memory session.
 
 ---
@@ -212,7 +213,7 @@ export const event: Event<Events.EventName> = {
 - Skips `*.test.ts` / `*.spec.ts`
 
 ### `src/agent/`
-**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop (`MAX_STEPS` 12). `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). `images.ts` downloads jpeg/png/gif/webp attachments (current message + replied message, max 4, 5 MB each) and sends them as vision blocks. `settings.ts` holds the live model + system prompt (`/agent`); persisted to `data/agent-settings.json`. `mentions.ts` breaks `@everyone` / role / user pings in public replies. Sessions are in-memory (`channelId:userId`, 30 minute TTL, 24 messages). Tools live under `src/agent/tools/` and are dispatched from `discord-tools.ts`. Actions run on the mention guild only; a foreign `guildId` is rejected. Discord API errors return `{ error }` so the model can explain them. Webhook tokens are never returned. Overwrites accept any `PermissionFlagsBits` name.
+**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop (`MAX_STEPS` 12). `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). `images.ts` downloads jpeg/png/gif/webp attachments (current message + replied message, max 4, 5 MB each) and sends them as vision blocks. `settings.ts` holds the live model + system prompt (`/agent`); persisted to `data/agent-settings.json`. `models.ts` caches Anthropic's Models API for `/agent model` autocomplete. `mentions.ts` breaks `@everyone` / role / user pings in public replies. Sessions are in-memory (`channelId:userId`, 30 minute TTL, 24 messages). Tools live under `src/agent/tools/` and are dispatched from `discord-tools.ts`. Actions run on the mention guild only; a foreign `guildId` is rejected. Discord API errors return `{ error }` so the model can explain them. Webhook tokens are never returned. Overwrites accept any `PermissionFlagsBits` name.
 
 ### `logger.ts`
 **Pino logger configuration**.

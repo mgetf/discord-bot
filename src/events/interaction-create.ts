@@ -25,6 +25,26 @@ export const event: Event<Events.InteractionCreate> = {
       return;
     }
 
+    if (interaction.isAutocomplete()) {
+      const command = interaction.client.commands.get(interaction.commandName);
+      if (!command?.autocomplete) {
+        await interaction.respond([]);
+        return;
+      }
+      try {
+        await command.autocomplete(interaction);
+      } catch (error) {
+        log.error(
+          { err: error },
+          `Error autocompleting command: ${interaction.commandName}`
+        );
+        if (!interaction.responded) {
+          await interaction.respond([]);
+        }
+      }
+      return;
+    }
+
     if (!interaction.isChatInputCommand()) return;
 
     const command = interaction.client.commands.get(interaction.commandName);

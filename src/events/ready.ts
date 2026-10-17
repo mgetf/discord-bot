@@ -1,5 +1,6 @@
 import { Events, OAuth2Scopes, PermissionFlagsBits } from 'discord.js';
 import { cacheApplicationOwnerId } from '@/agent/allowlist';
+import { listAgentModels } from '@/agent/models';
 import { getAgentModel } from '@/agent/settings';
 import { env } from '@/env';
 import type { Event } from '@/types';
@@ -57,6 +58,12 @@ export const event: Event<Events.ClientReady> = {
           ? 'AI agent enabled for allowlisted users'
           : 'AI agent enabled for the Discord application owner'
       );
+      try {
+        const models = await listAgentModels();
+        log.info({ count: models.length }, 'Cached Anthropic model catalog');
+      } catch (err) {
+        log.warn({ err }, 'Failed to prefetch Anthropic models');
+      }
     } else {
       log.warn('AI agent disabled: ANTHROPIC_API_KEY is not set');
     }

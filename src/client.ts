@@ -7,8 +7,20 @@ export const client = new Client({
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildMessages,
     // Privileged. Required to read message text for the AI agent.
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildModeration,
+    GatewayIntentBits.GuildScheduledEvents,
+    GatewayIntentBits.GuildExpressions,
+    GatewayIntentBits.GuildInvites,
+    GatewayIntentBits.DirectMessages
   ],
   // Without GuildMember, discord.js does not emit GuildMemberUpdate for uncached members.
-  partials: [Partials.GuildMember, Partials.User, Partials.Message]
+  // Channel is required to receive DMs (uncached DM channels).
+  partials: [
+    Partials.GuildMember,
+    Partials.User,
+    Partials.Message,
+    Partials.Channel
+  ]
 });

@@ -22,7 +22,20 @@ export const event: Event<Events.ClientReady> = {
         PermissionFlagsBits.SendMessages,
         PermissionFlagsBits.EmbedLinks,
         PermissionFlagsBits.ReadMessageHistory,
-        PermissionFlagsBits.AddReactions
+        PermissionFlagsBits.AddReactions,
+        PermissionFlagsBits.ManageMessages,
+        PermissionFlagsBits.BanMembers,
+        PermissionFlagsBits.KickMembers,
+        PermissionFlagsBits.ModerateMembers,
+        PermissionFlagsBits.ManageWebhooks,
+        PermissionFlagsBits.ManageGuildExpressions,
+        PermissionFlagsBits.ManageEvents,
+        PermissionFlagsBits.MoveMembers,
+        PermissionFlagsBits.MuteMembers,
+        PermissionFlagsBits.DeafenMembers,
+        PermissionFlagsBits.ManageNicknames,
+        PermissionFlagsBits.CreateInstantInvite,
+        PermissionFlagsBits.Connect
       ]
     });
     process.env.NODE_ENV !== 'production' &&

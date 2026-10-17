@@ -15,7 +15,7 @@ import { env } from '@/env';
 import { logger } from '@/utils/logger';
 
 const log = logger.child({ name: 'agent/run' });
-const MAX_STEPS = 8;
+const MAX_STEPS = 12;
 
 export async function runAgentTurn(input: {
   session: AgentSession;
@@ -64,7 +64,10 @@ export async function runAgentTurn(input: {
     const toolResults: ToolResultBlockParam[] = [];
     for (const block of toolUses) {
       if (block.type !== 'tool_use') continue;
-      log.info({ tool: block.name, step }, 'Agent tool call');
+      log.info(
+        { tool: block.name, step, requesterTag: input.message.author.tag },
+        'Agent tool call'
+      );
       const output = await executeAgentTool(block.name, asRecord(block.input), {
         guild: input.guild,
         channelId: input.message.channelId,

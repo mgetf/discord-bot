@@ -11,7 +11,7 @@ The official Discord bot for the [mge.tf](https://mge.tf) community.
 - **Account Verification** — Users link Discord on mge.tf and receive **MGER** automatically. Unlinking restores **Unverified**. `/verify` is a fallback if roles were missed.
 - **Alt Account Detection** — `/altcheck` cross-references shared-IP whois databases across regions to flag likely alt accounts of a given Steam ID, for use by server admins/moderators.
 - **Staff role protection** — Discord roles mapped in the mge.tf staff hub cannot be granted by hand. If someone adds one, the bot removes it and DMs them to assign it at `/admin/staff`.
-- **AI ops chat** — Allowlisted users (by default, the Discord application owner) can @mention the bot or reply to it. It inspects and fixes channel permission overwrites, and keeps a 30-minute conversation session per channel.
+- **AI ops chat** — Allowlisted users (by default, the Discord application owner) can @mention the bot or reply to it. It can administer that Discord server (channels, roles, messages, overwrites, moderation, voice, events, invites, webhooks, forums, emojis, DMs) and keeps a 30-minute conversation session per channel.
 
 ## Setup
 
@@ -74,7 +74,7 @@ ANTHROPIC_API_KEY=
 1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
 2. Create a new application and add a Bot user
 3. Under **Privileged Gateway Intents**, enable **Server Members Intent** (role assignment and staff role protection) and **Message Content Intent** (AI ops chat)
-4. Invite the bot with **Manage Roles**, **Manage Channels**, **View Audit Log**, **Send Messages**, **Embed Links**, **Read Message History**, and **Add Reactions** (the ready-handler invite link includes these)
+4. Invite the bot with the permissions from the ready-handler invite link (manage channels/roles/messages, ban/kick/timeout, webhooks, emojis, events, voice move, nicknames, invites). If the bot role is already Administrator, skip a re-invite.
 5. Copy the bot token to `DISCORD_BOT_TOKEN`
 
 ### 4. Generate an API Key
@@ -123,7 +123,7 @@ Set `ANTHROPIC_API_KEY`. Leave `AGENT_ALLOWED_USER_IDS` empty to allow only the 
 - @mention the bot to start a conversation in that channel
 - Reply to the bot (no mention needed) to continue the same session
 - Sessions expire after 30 minutes of inactivity and live in memory (a restart starts clean)
-- The bot can inspect channels/roles and edit permission overwrites. It cannot grant Administrator.
+- The bot can administer the server where it was mentioned. Destructive tool calls take effect immediately. A `guildId` from another server is rejected. Discord 403s (missing bot permission) come back as `{ error }` in the tool result.
 - Public replies never ping `@everyone`, `@here`, roles, or users. `/agent` can change the model and system prompt without a redeploy.
 - Attach a jpeg/png/gif/webp (or reply to a message that has one) and the model can see it. Max 4 images per turn, 5 MB each.
 
@@ -149,7 +149,8 @@ src/
 ├── agent/
 │   ├── allowlist.ts   # Who may talk to the AI agent
 │   ├── sessions.ts    # In-memory conversation sessions
-│   ├── discord-tools.ts  # Channel inspect / overwrite tools
+│   ├── discord-tools.ts  # Tool catalog barrel
+│   ├── tools/            # Per-group Discord admin handlers
 │   ├── mentions.ts    # Strip pings from public replies
 │   ├── settings.ts    # Runtime model + system prompt
 │   ├── images.ts      # Discord attachments → vision

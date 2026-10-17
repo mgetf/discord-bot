@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { parseOverwriteUpdate } from '@/agent/permissions';
+import { parseOverwriteUpdate, parsePermissionCsv } from '@/agent/permissions';
 
 describe('parseOverwriteUpdate', () => {
   test('maps allow deny and unset onto Discord overwrite values', () => {
@@ -19,11 +19,34 @@ describe('parseOverwriteUpdate', () => {
     });
   });
 
-  test('rejects permissions the agent is not allowed to edit', () => {
+  test('accepts Administrator like any other PermissionFlagsBits name', () => {
+    expect(
+      parseOverwriteUpdate({
+        allow: ['Administrator', 'SendMessages']
+      })
+    ).toEqual({
+      patch: {
+        Administrator: true,
+        SendMessages: true
+      },
+      unknown: []
+    });
+  });
+
+  test('accepts JDA aliases', () => {
+    expect(
+      parsePermissionCsv('VIEW_CHANNEL,MESSAGE_SEND,ADMINISTRATOR')
+    ).toEqual({
+      names: ['ViewChannel', 'SendMessages', 'Administrator'],
+      unknown: []
+    });
+  });
+
+  test('rejects unknown permission names', () => {
     const result = parseOverwriteUpdate({
-      allow: ['Administrator', 'SendMessages']
+      allow: ['NotARealPerm', 'SendMessages']
     });
     expect(result.patch).toEqual({ SendMessages: true });
-    expect(result.unknown).toEqual(['Administrator']);
+    expect(result.unknown).toEqual(['NotARealPerm']);
   });
 });

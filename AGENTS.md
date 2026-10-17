@@ -5,7 +5,7 @@ The **mge.tf Discord Bot** serves the mge.tf community with three features:
 - **Verification** — linking Discord on mge.tf grants **MGER** and removes **Unverified**. Unlinking reverses that. The bot DMs the user when roles change. `/verify` remains a fallback. The bot also verifies on guild join when the Discord ID is already linked.
 - **Alt detection** — `/altcheck` cross-references shared-IP whois databases (per region) to flag likely alt accounts of a given Steam ID.
 - **Staff role protection** — hub-managed Discord roles follow mge.tf. `GET /api/v1/staff/discord-managed-roles` is the catalog; `GET /api/v1/staff/discord-desired-roles/:discordId` is who should hold them. Manual add or remove in Discord is reconciled back to that assignment. Verification DMs are best-effort; Discord 50007 is ignored when the user has DMs from server members closed.
-- **AI ops chat** — allowlisted users @mention the bot (or reply to it) and an Anthropic tool loop inspects/fixes channel permission overwrites. Conversation state is in-memory per `channelId:userId` for 30 minutes.
+- **AI ops chat** — allowlisted users @mention the bot (or reply to it) and an Anthropic tool loop administers that Discord server (channels, roles, messages, overwrites, moderation, voice, events, invites, webhooks, forums, emojis, DMs). Conversation state is in-memory per `channelId:userId` for 30 minutes.
 
 ## Tech Stack
 
@@ -25,7 +25,7 @@ The **mge.tf Discord Bot** serves the mge.tf community with three features:
 ```
 src/
 ├── index.ts          # Entry point
-├── client.ts         # Discord Client setup (Guilds + GuildMembers + GuildMessages + MessageContent)
+├── client.ts         # Discord Client setup (guilds, members, messages, voice, moderation, DMs)
 ├── env.ts            # Environment variable schema
 ├── types.d.ts        # Type definitions
 ├── deploy.ts         # Command deployment script
@@ -43,8 +43,9 @@ src/
 │   ├── allowlist.ts      # Who may talk to the AI agent
 │   ├── sessions.ts       # In-memory conversation sessions
 │   ├── trigger.ts        # Mention / reply gate
-│   ├── permissions.ts    # Allowlisted overwrite flags
-│   ├── discord-tools.ts  # Channel inspect / overwrite tools
+│   ├── permissions.ts    # PermissionFlagsBits name parsing for overwrites
+│   ├── discord-tools.ts  # Tool catalog barrel + executeAgentTool
+│   ├── tools/            # Per-group Discord admin handlers
 │   ├── split-message.ts  # Discord 2000-char chunking
 │   ├── context.ts        # User-turn context block (guild/channel/reply)
 │   ├── mentions.ts       # Strip pings from public replies
@@ -74,7 +75,7 @@ src/
 4. Logs into Discord
 
 ### `src/client.ts`
-**Discord Client singleton**. Enables `Guilds` and `GuildMembers` intents, plus `Partials.GuildMember` and `Partials.User`.
+**Discord Client singleton**. Enables `Guilds`, `GuildMembers`, `GuildMessages`, `MessageContent`, plus `GuildVoiceStates`, `GuildModeration`, `GuildScheduledEvents`, `GuildExpressions`, `GuildInvites`, and `DirectMessages`. Partials: `GuildMember`, `User`, `Message`, `Channel` (DMs).
 `GuildMembers` is a Privileged Intent — it must be enabled in the Discord Developer Portal. Without the GuildMember partial, discord.js does not emit `GuildMemberUpdate` for members that were not already in cache (first role change is dropped).
 
 ### `src/env.ts`
@@ -184,7 +185,7 @@ export const event: Event<Events.EventName> = {
 ```
 
 ### Existing Events
-- `ready.ts`: Bot ready. Generates an invite link with the minimum permissions the bot needs (`ManageRoles`, `ManageChannels`, `ViewAuditLog`, `SendMessages`, `EmbedLinks`, `ReadMessageHistory`, `AddReactions`), logged in dev only. Prefetches managed staff role IDs and the Discord application owner for the AI allowlist.
+- `ready.ts`: Bot ready. Generates an invite link with the permissions the bot needs for verification, staff roles, and the AI admin tools (manage channels/roles/messages, ban/kick/timeout, webhooks, emojis, events, voice move, nicknames, invites), logged in dev only. Prefetches managed staff role IDs and the Discord application owner for the AI allowlist. If the bot role is already Administrator, a re-invite is not required.
 - `guild-member-add.ts`: If the joining member's Discord ID is linked on mge.tf, grant MGER, remove Unverified, and DM them.
 - `guild-member-update.ts`: On role changes, load desired hub roles from mge.tf and add/remove until Discord matches. Nickname-only updates are skipped when `oldMember` is cached. Uncached members still reconcile (partials). After membership screening (`pending` → not pending), runs the same auto-verify as join. If `DISCORD_GUILD_ID` is set, only that guild is watched.
 - `interaction-create.ts`: Handles slash commands and the `/agent prompt` modal
@@ -211,7 +212,7 @@ export const event: Event<Events.EventName> = {
 - Skips `*.test.ts` / `*.spec.ts`
 
 ### `src/agent/`
-**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop. `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). `images.ts` downloads jpeg/png/gif/webp attachments (current message + replied message, max 4, 5 MB each) and sends them as vision blocks. `settings.ts` holds the live model + system prompt (`/agent`); persisted to `data/agent-settings.json`. `mentions.ts` breaks `@everyone` / role / user pings in public replies. Sessions are in-memory (`channelId:userId`, 30 minute TTL). Tools live in `discord-tools.ts` and can only edit a fixed set of channel permission flags.
+**AI ops chat**. `message-create.ts` is the Discord listener. `run.ts` is the Anthropic tool loop (`MAX_STEPS` 12). `context.ts` builds the user-turn context block, including `replied_message_content` when the user replied to a message (`fetchReference()`). `images.ts` downloads jpeg/png/gif/webp attachments (current message + replied message, max 4, 5 MB each) and sends them as vision blocks. `settings.ts` holds the live model + system prompt (`/agent`); persisted to `data/agent-settings.json`. `mentions.ts` breaks `@everyone` / role / user pings in public replies. Sessions are in-memory (`channelId:userId`, 30 minute TTL, 24 messages). Tools live under `src/agent/tools/` and are dispatched from `discord-tools.ts`. Actions run on the mention guild only; a foreign `guildId` is rejected. Discord API errors return `{ error }` so the model can explain them. Webhook tokens are never returned. Overwrites accept any `PermissionFlagsBits` name.
 
 ### `logger.ts`
 **Pino logger configuration**.

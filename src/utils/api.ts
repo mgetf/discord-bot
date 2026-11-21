@@ -1,4 +1,5 @@
 import { env } from '@/env';
+import type { ClaimedOutboxEvent } from '@/outbox/types';
 import { logger } from '@/utils/logger';
 
 const log = logger.child({ name: 'utils/api' });
@@ -15,6 +16,37 @@ export type UserLookupResult = {
   discordId: string | null;
   discordUsername: string | null;
 };
+
+async function postJson(path: string, body: unknown): Promise<Response> {
+  const base = env.MGE_API_URL.replace(/\/+$/, '');
+  const url = `${base}${path}`;
+
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.MGE_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+  } catch (err) {
+    log.error({ err }, 'Network error calling mge.tf API');
+    throw new Error('Could not reach the mge.tf API. Please try again later.');
+  }
+
+  if (!res.ok) {
+    log.error(
+      { status: res.status, url },
+      'Unexpected response from mge.tf API'
+    );
+    throw new Error(
+      `mge.tf API returned an unexpected error (HTTP ${res.status}).`
+    );
+  }
+  return res;
+}
 
 /**
  * Typed client for the mge.tf external API (v1).
@@ -121,6 +153,25 @@ export const mgeApi = {
     }
 
     return parseRoleIds(await res.json());
+  },
+
+  /**
+   * Claim due notification events for delivery. Unacked events return to the
+   * queue after the site's lease expires.
+   */
+  async claimOutbox(limit: number): Promise<ClaimedOutboxEvent[]> {
+    const res = await postJson('/api/v1/bot/outbox/claim', { limit });
+    const body = (await res.json()) as { events?: ClaimedOutboxEvent[] };
+    return Array.isArray(body.events) ? body.events : [];
+  },
+
+  /** Report what happened to one claimed event. */
+  async ackOutbox(
+    id: number,
+    result: 'delivered' | 'retry' | 'dead',
+    error?: string
+  ): Promise<void> {
+    await postJson(`/api/v1/bot/outbox/${id}/ack`, { result, error });
   },
 
   /**

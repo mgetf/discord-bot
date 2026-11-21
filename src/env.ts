@@ -53,6 +53,15 @@ export const env = createEnv({
       .optional()
       .transform((val) => (val && val.length > 0 ? val : undefined)),
     AGENT_MODEL: z.string().optional().default('claude-sonnet-5-5'),
+    // Playoff notification outbox (see src/outbox)
+    OUTBOX_ENABLED: z
+      .enum(['true', 'false'])
+      .optional()
+      .default('true')
+      .transform((val) => val === 'true'),
+    OUTBOX_POLL_MS: z.coerce.number().int().min(1000).optional().default(5000),
+    STAFF_CHANNEL_ID: z.string().optional(),
+    PLAYOFFS_CHANNEL_ID: z.string().optional(),
     LOG_LEVEL: z
       .enum(['debug', 'info', 'warn', 'error'])
       .optional()

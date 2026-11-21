@@ -3,6 +3,7 @@ import { cacheApplicationOwnerId } from '@/agent/allowlist';
 import { listAgentModels } from '@/agent/models';
 import { getAgentModel } from '@/agent/settings';
 import { env } from '@/env';
+import { startOutboxWorker } from '@/outbox/worker';
 import type { Event } from '@/types';
 import { logger } from '@/utils/logger';
 import { refreshManagedStaffRoleIds } from '@/utils/managed-staff-roles';
@@ -77,5 +78,7 @@ export const event: Event<Events.ClientReady> = {
     } catch (err) {
       log.error({ err }, 'Failed to prefetch managed staff role IDs');
     }
+
+    startOutboxWorker(client);
   }
 };

@@ -20,6 +20,41 @@ const json = (m: ReturnType<typeof renderOutboxEvent>) => {
 };
 
 describe('renderOutboxEvent', () => {
+  test('match.reminder tells each side who they play and when', () => {
+    const startsAt = '2026-11-21T20:00:00.000Z';
+    const seconds = Math.floor(Date.parse(startsAt) / 1000);
+    const away = json(
+      renderOutboxEvent({
+        kind: 'match.reminder',
+        payload: {
+          ...base,
+          target: dm,
+          startsAt,
+          stage: '1h',
+          recipientSide: 'away'
+        }
+      })
+    );
+    expect(away.embed?.title).toBe('Your match starts soon');
+    expect(away.embed?.description).toContain('**Alpha**');
+    expect(away.embed?.description).toContain(`<t:${seconds}:R>`);
+
+    const day = json(
+      renderOutboxEvent({
+        kind: 'match.reminder',
+        payload: {
+          ...base,
+          target: dm,
+          startsAt,
+          stage: '24h',
+          recipientSide: 'home'
+        }
+      })
+    );
+    expect(day.embed?.title).toBe('Upcoming match');
+    expect(day.embed?.description).toContain('**Bravo**');
+  });
+
   test('match_created names the opponent for the recipient side', () => {
     const m = renderOutboxEvent({
       kind: 'playoff.match_created',

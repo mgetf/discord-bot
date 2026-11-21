@@ -8,6 +8,7 @@ import type {
   BracketCompletePayload,
   ClaimedOutboxEvent,
   MatchCreatedPayload,
+  MatchReminderPayload,
   OutboxKind,
   OutboxPayloadByKind,
   OutboxTarget,
@@ -70,6 +71,19 @@ export const renderMatchCreated = (p: MatchCreatedPayload): OutboxMessage => {
       .setTitle('New playoff match')
       .setDescription(`**${p.home.name}** vs **${p.away.name}**\n${series}.`);
   }
+  return { embeds: [embed], components: [linkRow('Open match', p.url)] };
+};
+
+export const renderMatchReminder = (p: MatchReminderPayload): OutboxMessage => {
+  const opponent = p.recipientSide === 'home' ? p.away.name : p.home.name;
+  const when = discordTime(p.startsAt);
+  const embed = new EmbedBuilder()
+    .setColor(p.stage === '1h' ? Colors.Warning : Colors.Info)
+    .setTitle(p.stage === '1h' ? 'Your match starts soon' : 'Upcoming match')
+    .setDescription(
+      `You play **${opponent}** ${when}.\nIf the time no longer works, rearrange it on the match page.`
+    )
+    .setFooter({ text: context(p.division, p.round) });
   return { embeds: [embed], components: [linkRow('Open match', p.url)] };
 };
 
@@ -159,6 +173,7 @@ export const renderBracketComplete = (
 const renderers: {
   [K in OutboxKind]: (payload: OutboxPayloadByKind[K]) => OutboxMessage;
 } = {
+  'match.reminder': renderMatchReminder,
   'playoff.match_created': renderMatchCreated,
   'playoff.score_submitted': renderScoreSubmitted,
   'playoff.score_confirmed': renderScoreConfirmed,

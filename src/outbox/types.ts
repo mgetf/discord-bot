@@ -38,6 +38,13 @@ export type MatchCreatedPayload = Base &
     recipientSide: 'home' | 'away' | null;
   };
 
+export type MatchReminderPayload = Base &
+  MatchFields & {
+    startsAt: string;
+    stage: '24h' | '1h';
+    recipientSide: 'home' | 'away';
+  };
+
 export type ScoreSubmittedPayload = Base &
   MatchFields & {
     submittedByTeam: string;
@@ -70,6 +77,7 @@ export type BracketCompletePayload = Base & {
 };
 
 export type OutboxPayloadByKind = {
+  'match.reminder': MatchReminderPayload;
   'playoff.match_created': MatchCreatedPayload;
   'playoff.score_submitted': ScoreSubmittedPayload;
   'playoff.score_confirmed': ScoreConfirmedPayload;
@@ -90,6 +98,7 @@ export type ClaimedOutboxEvent = {
 };
 
 export const OUTBOX_KINDS: readonly OutboxKind[] = [
+  'match.reminder',
   'playoff.match_created',
   'playoff.score_submitted',
   'playoff.score_confirmed',

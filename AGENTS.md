@@ -5,6 +5,7 @@ The **mge.tf Discord Bot** serves the mge.tf community with three features:
 - **Verification** — linking Discord on mge.tf grants **MGER** and removes **Unverified**. Unlinking reverses that. The bot DMs the user when roles change. `/verify` remains a fallback. The bot also verifies on guild join when the Discord ID is already linked.
 - **Alt detection** — `/altcheck` cross-references shared-IP whois databases (per region) to flag likely alt accounts of a given Steam ID.
 - **Staff role protection** — hub-managed Discord roles follow mge.tf. `GET /api/v1/staff/discord-managed-roles` is the catalog; `GET /api/v1/staff/discord-desired-roles/:discordId` is who should hold them. Manual add or remove in Discord is reconciled back to that assignment. Verification DMs are best-effort; Discord 50007 is ignored when the user has DMs from server members closed.
+- **Playoff notifications** — the site writes events to an outbox when a playoff match is created, a score is reported, confirmed or disputed, a team is eliminated, or a bracket finishes. The bot polls `POST /api/v1/bot/outbox/claim`, DMs the players (with a link to the match), posts to the staff/playoffs channels, and acks each event. Closed DMs fall back to a mention in `PLAYOFFS_CHANNEL_ID`.
 - **AI ops chat** — allowlisted users @mention the bot (or reply to it) and an Anthropic tool loop administers that Discord server (channels, roles, messages, overwrites, moderation, voice, events, invites, webhooks, forums, emojis, DMs). Conversation state is in-memory per `channelId:userId` for 30 minutes.
 
 ## Tech Stack
@@ -39,6 +40,11 @@ src/
 │   ├── guild-member-update.ts  # Reconciles hub Discord roles to mge.tf; verifies after membership screening
 │   ├── interaction-create.ts  # Command router
 │   └── message-create.ts      # AI ops chat (@mention / reply)
+├── outbox/
+│   ├── types.ts      # Payload contract (mirrors website-next outboxEvents.ts)
+│   ├── render.ts     # Event → embed + link button (pure)
+│   ├── deliver.ts    # Send one event, decide the ack (pure-ish, injected sends)
+│   └── worker.ts     # Poll loop started from events/ready.ts
 ├── agent/
 │   ├── allowlist.ts      # Who may talk to the AI agent
 │   ├── sessions.ts       # In-memory conversation sessions
@@ -103,6 +109,9 @@ ANTHROPIC_API_KEY?: string        // Required to enable the AI agent
 AGENT_MODEL?: string              // Default claude-sonnet-5-5; /agent model overrides from the live Anthropic catalog
 LOG_LEVEL?: 'debug' | 'info' | 'warn' | 'error'
 ```
+
+### `src/outbox/`
+Delivers site notifications. `worker.ts` polls every `OUTBOX_POLL_MS` (default 5000, backs off up to 60s when the site is unreachable), claims up to 20 events, sends them one at a time, and acks `delivered`, `retry` or `dead`. Env: `OUTBOX_ENABLED` (default true), `OUTBOX_POLL_MS`, `STAFF_CHANNEL_ID`, `PLAYOFFS_CHANNEL_ID`. An unset channel ID skips channel posts and acks them delivered. Discord 50007/10013 on a DM uses the event's `fallbackChannel`; other permanent errors are dead; network/5xx errors retry.
 
 ### `src/utils/api.ts`
 **mge.tf API client**. Exports `mgeApi` with:

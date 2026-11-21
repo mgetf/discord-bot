@@ -68,7 +68,9 @@ describe('renderOutboxEvent', () => {
     });
     const { embed, row } = json(m);
     expect(embed?.description).toContain('**Bravo**');
-    expect(embed?.description).toContain('Best of 3');
+    expect(embed?.description).toContain(
+      'Best of 3 arenas, first to 2 rounds (bo3)'
+    );
     expect(embed?.footer?.text).toBe('Premier · Semifinals');
     expect(row?.components[0]).toMatchObject({
       label: 'Open match',

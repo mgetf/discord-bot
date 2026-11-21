@@ -48,6 +48,18 @@ const discordTime = (iso: string): string => {
   return `<t:${Math.floor(ms / 1000)}:R>`;
 };
 
+// Plain-language playoff length: "1 arena, first to 4 rounds (bo7)".
+// `bestOf` is the arena count, `arenaGames` is the rounds on each arena.
+const playoffLengthLabel = (bestOf: number, arenaGames: number): string => {
+  const arenaPart = bestOf === 1 ? '1 arena' : `Best of ${bestOf} arenas`;
+  const firstTo = Math.ceil((arenaGames || 1) / 2);
+  const roundsPart =
+    arenaGames <= 1
+      ? `1 round each (bo${arenaGames || 1})`
+      : `first to ${firstTo} rounds (bo${arenaGames})`;
+  return `${arenaPart}, ${roundsPart}`;
+};
+
 export const renderMatchCreated = (p: MatchCreatedPayload): OutboxMessage => {
   const opponent =
     p.recipientSide === 'home'
@@ -55,7 +67,7 @@ export const renderMatchCreated = (p: MatchCreatedPayload): OutboxMessage => {
       : p.recipientSide === 'away'
         ? p.home.name
         : null;
-  const series = `Best of ${p.bestOf}, ${p.arenaGames} per arena`;
+  const series = playoffLengthLabel(p.bestOf, p.arenaGames);
   const embed = new EmbedBuilder()
     .setColor(Colors.Info)
     .setFooter({ text: context(p.division, p.round) });

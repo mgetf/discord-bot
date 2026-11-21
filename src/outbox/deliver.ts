@@ -83,7 +83,11 @@ export type DeliveryDeps = {
     channel: OutboxChannel,
     channelId?: string | null
   ) => boolean;
-  sendDm: (discordId: string, message: OutboxMessage) => Promise<void>;
+  /** Resolves with the id of the DM that was sent, when the sender knows it. */
+  sendDm: (
+    discordId: string,
+    message: OutboxMessage
+  ) => Promise<string | undefined | void>;
   /** `mentionUserId` is set only for the closed-DM fallback post. */
   sendChannel: (
     channel: OutboxChannel,
@@ -93,7 +97,12 @@ export type DeliveryDeps = {
   ) => Promise<void>;
 };
 
-export type DeliveryOutcome = { result: OutboxAckResult; error?: string };
+export type DeliveryOutcome = {
+  result: OutboxAckResult;
+  error?: string;
+  /** The DM that was sent, so a reply to it can be tied back to this event. */
+  messageId?: string;
+};
 
 const messageOf = (err: unknown): string =>
   (err instanceof Error ? err.message : String(err)).slice(0, 500);
@@ -134,8 +143,10 @@ export const deliverEvent = async (
   }
 
   try {
-    await deps.sendDm(target.discordId, message);
-    return { result: 'delivered' };
+    const sent = await deps.sendDm(target.discordId, message);
+    return typeof sent === 'string'
+      ? { result: 'delivered', messageId: sent }
+      : { result: 'delivered' };
   } catch (err) {
     const fallbackInfo = event.payload as {
       fallbackChannel?: OutboxChannel;

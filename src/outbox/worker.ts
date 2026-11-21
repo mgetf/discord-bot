@@ -21,7 +21,11 @@ const buildDeps = (client: Client): DeliveryDeps => ({
     !!(regionChannelId || channelId(channel)),
   sendDm: async (discordId, message) => {
     const user = await client.users.fetch(discordId);
-    await user.send({ ...message, allowedMentions: { parse: [] } });
+    const sent = await user.send({
+      ...message,
+      allowedMentions: { parse: [] }
+    });
+    return sent.id;
   },
   sendChannel: async (channel, message, mentionUserId, regionChannelId) => {
     const id = regionChannelId || channelId(channel);
@@ -66,7 +70,12 @@ export const startOutboxWorker = (client: Client): (() => void) => {
         if (stopped) break;
         const outcome = await deliverEvent(event, deps);
         try {
-          await mgeApi.ackOutbox(event.id, outcome.result, outcome.error);
+          await mgeApi.ackOutbox(
+            event.id,
+            outcome.result,
+            outcome.error,
+            outcome.messageId
+          );
         } catch (err) {
           // Unacked rows return to the queue when the site's lease runs out.
           log.error({ err, eventId: event.id }, 'Failed to ack outbox event');

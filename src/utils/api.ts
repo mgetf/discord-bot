@@ -10,6 +10,15 @@ export type DiscordLinkResult = {
   discordUsername: string | null;
 };
 
+export type InboxMessage = {
+  discordMessageId: string;
+  discordUserId: string;
+  discordUsername: string;
+  content: string;
+  attachments?: Array<{ name: string; url: string }>;
+  replyToMessageId?: string | null;
+};
+
 export type UserLookupResult = {
   steamId: string;
   steamUsername: string;
@@ -169,9 +178,19 @@ export const mgeApi = {
   async ackOutbox(
     id: number,
     result: 'delivered' | 'retry' | 'dead',
-    error?: string
+    error?: string,
+    messageId?: string
   ): Promise<void> {
-    await postJson(`/api/v1/bot/outbox/${id}/ack`, { result, error });
+    await postJson(`/api/v1/bot/outbox/${id}/ack`, {
+      result,
+      error,
+      messageId
+    });
+  },
+
+  /** Forward a direct message someone sent the bot, for admins to read on mge.tf. */
+  async postInbox(message: InboxMessage): Promise<void> {
+    await postJson('/api/v1/bot/inbox', message);
   },
 
   /**

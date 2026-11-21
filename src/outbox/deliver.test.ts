@@ -177,3 +177,13 @@ describe('deliverEvent', () => {
     );
   });
 });
+
+describe('deliverEvent message id', () => {
+  test('passes back the id of the DM it sent', async () => {
+    const d = deps({ sendDm: async () => '4242' });
+    expect(await deliverEvent(event(), d)).toEqual({
+      result: 'delivered',
+      messageId: '4242'
+    });
+  });
+});
